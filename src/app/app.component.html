@@ -7,32 +7,19 @@
     [nzTrigger]="null"
   >
     <div class="sidebar-logo">
-      <a href="https://ng.ant.design/" target="_blank">
-        <img src="https://ng.ant.design/assets/img/logo.svg" alt="logo">
-        <h1>Ant Design of Angular</h1>
-      </a>
+        <!--suppress HtmlUnknownTarget -->
+      <img src="logo.png" alt="logo">
+        <h1>Task Manager</h1>
     </div>
     <ul nz-menu nzTheme="dark" nzMode="inline" [nzInlineCollapsed]="isCollapsed">
-      <li nz-submenu nzOpen nzTitle="Dashboard" nzIcon="dashboard">
-        <ul>
-          <li nz-menu-item nzMatchRouter>
-            <a routerLink="/welcome">Welcome</a>
+          <li nz-menu-item nzMatchRouter routerLink="/welcome">
+            <span nz-icon nzType="home"></span>
+            <span><strong>Welcome</strong></span>
           </li>
-          <li nz-menu-item nzMatchRouter>
-            <a>Monitor</a>
+          <li nz-menu-item nzMatchRouter routerLink="/tasks">
+            <span nz-icon nzType="check-square"></span>
+            <span><strong>Task List</strong></span>
           </li>
-          <li nz-menu-item nzMatchRouter>
-            <a>Workplace</a>
-          </li>
-        </ul>
-      </li>
-      <li nz-submenu nzOpen nzTitle="Form" nzIcon="form">
-        <ul>
-          <li nz-menu-item nzMatchRouter>
-            <a>Basic Form</a>
-          </li>
-        </ul>
-      </li>
     </ul>
   </nz-sider>
   <nz-layout>
@@ -48,5 +35,6 @@
         <router-outlet></router-outlet>
       </div>
     </nz-content>
+    <nz-footer><h2>© 2025 - Elīza Kanska</h2></nz-footer>
   </nz-layout>
 </nz-layout>

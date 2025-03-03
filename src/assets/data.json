@@ -1,0 +1,26 @@
+[
+  {
+    "id": 1,
+    "title": "Fix login bug",
+    "description": "Resolve the issue with user authentication.",
+    "type": "BUG",
+    "createdOn": "2025-03-01",
+    "status": "IN_PROGRESS"
+  },
+  {
+    "id": 2,
+    "title": "Add search feature",
+    "description": "Implement search functionality for the dashboard.",
+    "type": "TASK",
+    "createdOn": "2025-02-28",
+    "status": "PENDING"
+  },
+  {
+    "id": 3,
+    "title": "UI Enhancement",
+    "description": "Improve the layout and design of the user profile page.",
+    "type": "TASK",
+    "createdOn": "2025-02-27",
+    "status": "COMPLETED"
+  }
+]

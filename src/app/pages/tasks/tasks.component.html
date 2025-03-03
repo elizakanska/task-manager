@@ -1,0 +1,96 @@
+<div class="container">
+  <h2>Task Manager</h2>
+
+  <input
+    type="text"
+    [(ngModel)]="searchQuery"
+    placeholder="Search by task description"
+    class="search-bar"
+    (input)="searchTasks()"/>
+
+  <button (click)="openTaskForm()" class="btn btn-primary">
+    <span nz-icon nzType="plus-square"></span>
+    <span> Add New Task</span>
+  </button>
+
+
+  <table class="table">
+    <thead>
+    <tr>
+      <th>Title</th>
+      <th>Description</th>
+      <th>Type</th>
+      <th>Created On</th>
+      <th>Status</th>
+      <th>Action</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr *ngFor="let task of filteredTasks; trackBy: trackByTaskId">
+      <td>{{ task.title }}</td>
+      <td>{{ task.description }}</td>
+      <td>{{ task.type }}</td>
+      <td>{{ task.createdOn }}</td>
+      <td>{{ task.status }}</td>
+      <td>
+        <button (click)="editTask(task)" class="btn btn-warning">
+          <span nz-icon nzType="edit"></span>
+          <span> Edit</span>
+        </button>
+        <button (click)="deleteTask(task.id)" class="btn btn-danger">
+          <span nz-icon nzType="delete"></span>
+          <span> Delete</span>
+        </button>
+      </td>
+    </tr>
+    </tbody>
+  </table>
+
+  <div class="modal" [ngClass]="{ 'is-visible': showTaskForm }">
+    <div class="modal-content custom-form">
+      <form nz-form [formGroup]="taskFormGroup" (ngSubmit)="saveTask()">
+
+        <h3>{{ editingTask ? 'Edit Task' : 'Add Task' }}</h3>
+
+        <nz-form-item>
+          <nz-form-control nzHasFeedback nzErrorTip="Invalid title!">
+            <input nz-input placeholder="Title" formControlName="title"/>
+          </nz-form-control>
+        </nz-form-item>
+
+        <nz-form-item>
+          <nz-form-control nzHasFeedback nzErrorTip="Invalid description!">
+            <input nz-input placeholder="Description" formControlName="description"/>
+          </nz-form-control>
+        </nz-form-item>
+
+        <nz-form-item>
+          <nz-form-control nzHasFeedback nzErrorTip="Please select a type!">
+            <nz-select formControlName="type" nzPlaceHolder="Select Type">
+              <nz-option nzValue="TASK" nzLabel="Task"></nz-option>
+              <nz-option nzValue="BUG" nzLabel="Bug"></nz-option>
+            </nz-select>
+          </nz-form-control>
+        </nz-form-item>
+
+        <nz-form-item>
+          <nz-form-control nzHasFeedback nzErrorTip="Invalid status!">
+            <nz-select formControlName="status" nzPlaceHolder="Select Status">
+              <nz-option nzValue="PENDING" nzLabel="Pending"></nz-option>
+              <nz-option nzValue="IN_PROGRESS" nzLabel="In Progress"></nz-option>
+              <nz-option nzValue="COMPLETED" nzLabel="Completed"></nz-option>
+            </nz-select>
+          </nz-form-control>
+        </nz-form-item>
+
+        <button nz-button class="login-form-button login-form-margin" [nzType]="'primary'">
+          {{ editingTask ? 'Update' : 'Create' }}
+        </button>
+
+        <button nz-button class="login-form-button login-form-margin" (click)="closeTaskForm()" nzType="default">
+          Cancel
+        </button>
+      </form>
+    </div>
+  </div>
+</div>
