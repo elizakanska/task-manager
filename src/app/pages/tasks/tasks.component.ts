@@ -25,8 +25,8 @@ export class TasksComponent implements OnInit {
     this.filteredTasks = [...this.tasks];
 
     this.taskFormGroup = this.fb.group({
-      title: ['', Validators.required],
-      description: ['', Validators.required],
+      title: ['', [Validators.required, Validators.minLength(3), Validators.maxLength(50)]],
+      description: ['', [Validators.required, Validators.minLength(5), Validators.maxLength(200)]],
       type: ['TASK', Validators.required],
       status: ['PENDING', Validators.required]
     });

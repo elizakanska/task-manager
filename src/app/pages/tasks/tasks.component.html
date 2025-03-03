@@ -30,7 +30,7 @@
       <td>{{ task.title }}</td>
       <td>{{ task.description }}</td>
       <td>{{ task.type }}</td>
-      <td>{{ task.createdOn }}</td>
+      <td>{{ task.createdOn | date: 'dd-MMM-yyyy'}}</td>
       <td>{{ task.status }}</td>
       <td>
         <button (click)="editTask(task)" class="btn btn-warning">
@@ -53,13 +53,13 @@
         <h3>{{ editingTask ? 'Edit Task' : 'Add Task' }}</h3>
 
         <nz-form-item>
-          <nz-form-control nzHasFeedback nzErrorTip="Invalid title!">
+          <nz-form-control nzHasFeedback nzErrorTip="Invalid title! Title must be 3-50 characters!">
             <input nz-input placeholder="Title" formControlName="title"/>
           </nz-form-control>
         </nz-form-item>
 
         <nz-form-item>
-          <nz-form-control nzHasFeedback nzErrorTip="Invalid description!">
+          <nz-form-control nzHasFeedback nzErrorTip="Invalid description! Description Must be 5-200 characters!">
             <input nz-input placeholder="Description" formControlName="description"/>
           </nz-form-control>
         </nz-form-item>
