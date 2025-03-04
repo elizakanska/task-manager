@@ -1,5 +1,5 @@
 import { NgModule } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import {CommonModule, DatePipe} from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { RouterLink, RouterOutlet } from '@angular/router';
 import { ZorroModule } from '../../BigImportNgZorro';
@@ -15,7 +15,9 @@ import { ZorroModule } from '../../BigImportNgZorro';
     RouterOutlet,
     RouterLink,
     ZorroModule,
-  ], exports: [
+  ],
+  providers: [DatePipe],
+  exports: [
     CommonModule,
     FormsModule,
     ReactiveFormsModule,

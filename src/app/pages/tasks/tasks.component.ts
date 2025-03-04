@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { SharedModule } from '../../modules/shared/shared.module';
 import taskData from '../../../assets/data.json';
+import { DatePipe } from '@angular/common';
 
 @Component({
   selector: 'app-tasks',
@@ -17,7 +18,7 @@ export class TasksComponent implements OnInit {
   taskFormGroup!: FormGroup;
   searchQuery: string = '';
 
-  constructor(private fb: FormBuilder) {}
+  constructor(private fb: FormBuilder, private datePipe: DatePipe) {}
 
   ngOnInit() {
     console.log('Task Data:', taskData);
@@ -28,7 +29,18 @@ export class TasksComponent implements OnInit {
       title: ['', [Validators.required, Validators.minLength(3), Validators.maxLength(50)]],
       description: ['', [Validators.required, Validators.minLength(5), Validators.maxLength(200)]],
       type: ['TASK', Validators.required],
-      status: ['PENDING', Validators.required]
+      status: ['PENDING', Validators.required],
+      createdOn: [
+        null,
+        [
+          Validators.required,
+          (control: { value: Date; }) => {
+            const selectedDate = new Date(control.value);
+            const today = new Date();
+            return selectedDate > today ? { futureDate: true } : null;
+          }
+        ]
+      ]
     });
   }
 
@@ -49,7 +61,19 @@ export class TasksComponent implements OnInit {
 
   openTaskForm(task: any = null) {
     this.editingTask = task ?? null;
-    this.taskFormGroup.setValue(task ? { title: task.title, description: task.description, type: task.type, status: task.status } : { title: '', description: '', type: 'TASK', status: 'PENDING' });
+    this.taskFormGroup.setValue(task ? {
+      title: task.title,
+      description: task.description,
+      type: task.type,
+      status: task.status,
+      createdOn: task.createdOn
+    } : {
+      title: '',
+      description: '',
+      type: 'TASK',
+      status: 'PENDING',
+      createdOn: ''
+    });
     this.showTaskForm = true;
   }
 
@@ -61,13 +85,24 @@ export class TasksComponent implements OnInit {
   saveTask() {
     if (this.taskFormGroup.invalid) return;
 
+    const date = new Date();
+    const savedDate = this.datePipe.transform(date, 'dd-MM-yyyy');
+
     if (this.editingTask) {
       const index = this.tasks.findIndex(t => t.id === this.editingTask.id);
       if (index !== -1) {
-        this.tasks[index] = { ...this.taskFormGroup.value, id: this.editingTask.id, createdOn: this.editingTask.createdOn };
+        this.tasks[index] = {
+          ...this.taskFormGroup.value,
+          id: this.editingTask.id,
+          createdOn: savedDate
+        };
       }
     } else {
-      this.tasks.push({ ...this.taskFormGroup.value, id: Date.now(), createdOn: new Date().toISOString() });
+      this.tasks.push({
+        ...this.taskFormGroup.value,
+        id: Date.now(),
+        createdOn: savedDate
+      });
     }
 
     this.filteredTasks = [...this.tasks];

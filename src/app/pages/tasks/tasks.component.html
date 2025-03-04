@@ -9,7 +9,7 @@
     (input)="searchTasks()"/>
 
   <button (click)="openTaskForm()" class="btn btn-primary">
-    <span nz-icon nzType="plus-square"></span>
+    <span nz-icon nzType="plus-circle"></span>
     <span> Add New Task</span>
   </button>
 
@@ -18,25 +18,15 @@
     <thead>
     <tr>
       <th>Title</th>
-      <th>Description</th>
-      <th>Type</th>
-      <th>Created On</th>
       <th>Status</th>
       <th>Action</th>
     </tr>
     </thead>
     <tbody>
     <tr *ngFor="let task of filteredTasks; trackBy: trackByTaskId">
-      <td>{{ task.title }}</td>
-      <td>{{ task.description }}</td>
-      <td>{{ task.type }}</td>
-      <td>{{ task.createdOn | date: 'dd-MMM-yyyy'}}</td>
+      <td><a (click)="editTask(task)">{{ task.title }}</a></td>
       <td>{{ task.status }}</td>
       <td>
-        <button (click)="editTask(task)" class="btn btn-warning">
-          <span nz-icon nzType="edit"></span>
-          <span> Edit</span>
-        </button>
         <button (click)="deleteTask(task.id)" class="btn btn-danger">
           <span nz-icon nzType="delete"></span>
           <span> Delete</span>
@@ -50,7 +40,7 @@
     <div class="modal-content custom-form">
       <form nz-form [formGroup]="taskFormGroup" (ngSubmit)="saveTask()">
 
-        <h3>{{ editingTask ? 'Edit Task' : 'Add Task' }}</h3>
+        <h3>{{ editingTask ? 'Task Details' : 'Add Task' }}</h3>
 
         <nz-form-item>
           <nz-form-control nzHasFeedback nzErrorTip="Invalid title! Title must be 3-50 characters!">
@@ -83,13 +73,32 @@
           </nz-form-control>
         </nz-form-item>
 
+        <nz-form-item>
+          <nz-form-control
+            nzHasFeedback
+            [nzErrorTip]="
+                          taskFormGroup.get('createdOn')?.hasError('required') ? 'Date is required!' :
+                          taskFormGroup.get('createdOn')?.hasError('futureDate') ? 'Date cannot be in the future!' : ''">
+            <nz-date-picker
+              nz-input
+              nzFormat="dd-MMM-yyyy"
+              formControlName="createdOn"
+            ></nz-date-picker>
+          </nz-form-control>
+        </nz-form-item>
+
         <button nz-button class="login-form-button login-form-margin" [nzType]="'primary'">
           {{ editingTask ? 'Update' : 'Create' }}
         </button>
 
-        <button nz-button class="login-form-button login-form-margin" (click)="closeTaskForm()" nzType="default">
+        <button
+          nz-button
+          class="login-form-button login-form-margin"
+          (click)="closeTaskForm(); $event.preventDefault()"
+          nzType="default">
           Cancel
         </button>
+
       </form>
     </div>
   </div>
