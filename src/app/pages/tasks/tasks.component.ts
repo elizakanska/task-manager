@@ -1,8 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { SharedModule } from '../../modules/shared/shared.module';
-import taskData from '../../../assets/data.json';
 import { DatePipe } from '@angular/common';
+import { TaskManagerService } from '../../services/task.manager.service';
 
 @Component({
   selector: 'app-tasks',
@@ -17,13 +17,17 @@ export class TasksComponent implements OnInit {
   editingTask: any = null;
   taskFormGroup!: FormGroup;
   searchQuery: string = '';
+  selectedTask: any;
+  showTaskDetails = false;
 
-  constructor(private fb: FormBuilder, private datePipe: DatePipe) {}
+  constructor(
+    private fb: FormBuilder,
+    private datePipe: DatePipe,
+    private taskService: TaskManagerService
+  ) {}
 
   ngOnInit() {
-    console.log('Task Data:', taskData);
-    this.tasks = taskData as any[];
-    this.filteredTasks = [...this.tasks];
+    this.loadTasks();
 
     this.taskFormGroup = this.fb.group({
       title: ['', [Validators.required, Validators.minLength(3), Validators.maxLength(50)]],
@@ -34,7 +38,7 @@ export class TasksComponent implements OnInit {
         null,
         [
           Validators.required,
-          (control: { value: Date; }) => {
+          (control: { value: Date }) => {
             const selectedDate = new Date(control.value);
             const today = new Date();
             return selectedDate > today ? { futureDate: true } : null;
@@ -42,6 +46,13 @@ export class TasksComponent implements OnInit {
         ]
       ]
     });
+  }
+
+  loadTasks() {
+    this.taskService.getTasks().subscribe((data: any) => {
+      this.tasks = data;
+      this.filteredTasks = [...this.tasks];
+    }, error => console.error('Error loading tasks:', error));
   }
 
   trackByTaskId(index: number, task: any): number {
@@ -87,26 +98,22 @@ export class TasksComponent implements OnInit {
 
     const date = new Date();
     const savedDate = this.datePipe.transform(date, 'dd-MM-yyyy');
+    const taskData = {
+      ...this.taskFormGroup.value,
+      createdOn: savedDate
+    };
 
     if (this.editingTask) {
-      const index = this.tasks.findIndex(t => t.id === this.editingTask.id);
-      if (index !== -1) {
-        this.tasks[index] = {
-          ...this.taskFormGroup.value,
-          id: this.editingTask.id,
-          createdOn: savedDate
-        };
-      }
+      this.taskService.editTask(this.editingTask.id, taskData).subscribe(() => {
+        this.loadTasks();
+        this.closeTaskForm();
+      });
     } else {
-      this.tasks.push({
-        ...this.taskFormGroup.value,
-        id: Date.now(),
-        createdOn: savedDate
+      this.taskService.addTask(taskData).subscribe(() => {
+        this.loadTasks();
+        this.closeTaskForm();
       });
     }
-
-    this.filteredTasks = [...this.tasks];
-    this.closeTaskForm();
   }
 
   editTask(task: any) {
@@ -116,8 +123,21 @@ export class TasksComponent implements OnInit {
   deleteTask(id: number) {
     const confirmed = window.confirm("Are you sure you want to delete this task?");
     if (confirmed) {
-      this.tasks = this.tasks.filter(task => task.id !== id);
-      this.filteredTasks = [...this.tasks];
+      this.taskService.deleteTask(id.toString()).subscribe(() => {
+        this.loadTasks();
+      });
     }
+  }
+
+  viewTaskDetails(taskId: number) {
+    this.taskService.getTaskById(taskId.toString()).subscribe((task) => {
+      this.selectedTask = task;
+      this.showTaskDetails = true;
+    }, error => console.error('Error loading task details:', error));
+  }
+
+  closeTaskDetails() {
+    this.showTaskDetails = false;
+    this.selectedTask = null;
   }
 }
