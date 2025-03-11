@@ -25,6 +25,12 @@ export class TaskManagerService {
     );
   }
 
+  getTaskById(id: string) {
+    return this.http.get(`/api/tasks/${id}`).pipe(
+      catchError(this.handleError)
+    );
+  }
+
   addTask(task: any) {
     return this.http.post('/api/tasks', task).pipe(
       catchError(this.handleError)
@@ -43,9 +49,9 @@ export class TaskManagerService {
     );
   }
 
-  getTaskById(id: string) {
-    return this.http.get(`/api/tasks/${id}`).pipe(
+  changeStatus(id: string, status: string){
+    return this.http.patch(`api/tasks/${id}/status`, status).pipe(
       catchError(this.handleError)
-    );
+    )
   }
 }
