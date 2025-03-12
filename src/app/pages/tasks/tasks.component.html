@@ -13,7 +13,6 @@
     <span> Add New Task</span>
   </button>
 
-
   <table class="table">
     <thead>
     <tr>
@@ -24,7 +23,7 @@
     </thead>
     <tbody>
     <tr *ngFor="let task of filteredTasks; trackBy: trackByTaskId">
-      <td><a (click)="viewTaskDetails(task)">{{ task.title }}</a></td>
+      <td><a (click)="viewTaskDetails(task.id)">{{ task.title }}</a></td>
       <td>{{ task.status }}</td>
       <td>
         <button (click)="editTask(task)" class="btn btn-warning">
@@ -118,4 +117,5 @@
       <p><strong>Created On:</strong> {{ selectedTask?.createdOn }}</p>
       <button nz-button nzType="default" (click)="closeTaskDetails()">Close</button>
     </div>
-  </div></div>
+  </div>
+</div>

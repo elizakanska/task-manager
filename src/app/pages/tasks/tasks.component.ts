@@ -1,8 +1,10 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { SharedModule } from '../../modules/shared/shared.module';
 import { DatePipe } from '@angular/common';
 import { TaskManagerService } from '../../services/task.manager.service';
+import { Subscription, switchMap } from 'rxjs';
+import { Task } from '../../models/task.model';
 
 @Component({
   selector: 'app-tasks',
@@ -10,25 +12,22 @@ import { TaskManagerService } from '../../services/task.manager.service';
   styleUrls: ['./tasks.component.scss'],
   imports: [SharedModule]
 })
-export class TasksComponent implements OnInit {
-  tasks: any[] = [];
-  filteredTasks: any[] = [];
+export class TasksComponent implements OnInit, OnDestroy {
+  tasks: Task[] = [];
+  filteredTasks: Task[] = [];
   showTaskForm = false;
-  editingTask: any = null;
-  taskFormGroup!: FormGroup;
+  editingTask: Task | null = null;
+  taskFormGroup: FormGroup;
   searchQuery: string = '';
-  selectedTask: any;
+  selectedTask: Task | null = null;
   showTaskDetails = false;
+  private subscriptions = new Subscription();
 
   constructor(
     private fb: FormBuilder,
     private datePipe: DatePipe,
     private taskService: TaskManagerService
-  ) {}
-
-  ngOnInit() {
-    this.loadTasks();
-
+  ) {
     this.taskFormGroup = this.fb.group({
       title: ['', [Validators.required, Validators.minLength(3), Validators.maxLength(50)]],
       description: ['', [Validators.required, Validators.minLength(5), Validators.maxLength(200)]],
@@ -48,14 +47,22 @@ export class TasksComponent implements OnInit {
     });
   }
 
-  loadTasks() {
-    this.taskService.getTasks().subscribe((data: any) => {
-      this.tasks = data;
-      this.filteredTasks = [...this.tasks];
-    }, error => console.error('Error loading tasks:', error));
+  ngOnInit() {
+    this.loadTasks();
   }
 
-  trackByTaskId(index: number, task: any): number {
+  loadTasks() {
+    const taskSub = this.taskService.getTasks().subscribe({
+      next: (data: Task[]) => {
+        this.tasks = data;
+        this.filteredTasks = [...this.tasks];
+      },
+      error: (err) => console.error('Error loading tasks:', err)
+    });
+    this.subscriptions.add(taskSub);
+  }
+
+  trackByTaskId(index: number, task: Task): number {
     return task.id;
   }
 
@@ -64,27 +71,31 @@ export class TasksComponent implements OnInit {
       this.filteredTasks = [...this.tasks];
     } else {
       this.filteredTasks = this.tasks.filter(task =>
-        task.title?.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
-        task.description?.toLowerCase().includes(this.searchQuery.toLowerCase())
+        task.title.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
+        task.description.toLowerCase().includes(this.searchQuery.toLowerCase())
       );
     }
   }
 
-  openTaskForm(task: any = null) {
-    this.editingTask = task ?? null;
-    this.taskFormGroup.setValue(task ? {
-      title: task.title,
-      description: task.description,
-      type: task.type,
-      status: task.status,
-      createdOn: task.createdOn
-    } : {
-      title: '',
-      description: '',
-      type: 'TASK',
-      status: 'PENDING',
-      createdOn: ''
-    });
+  openTaskForm(task: Task | null = null) {
+    this.editingTask = task;
+    if (task) {
+      this.taskFormGroup?.setValue({
+        title: task.title,
+        description: task.description,
+        type: task.type,
+        status: task.status,
+        createdOn: task.createdOn
+      });
+    } else {
+      this.taskFormGroup?.reset({
+        title: '',
+        description: '',
+        type: 'TASK',
+        status: 'PENDING',
+        createdOn: null
+      });
+    }
     this.showTaskForm = true;
   }
 
@@ -94,50 +105,71 @@ export class TasksComponent implements OnInit {
   }
 
   saveTask() {
-    if (this.taskFormGroup.invalid) return;
+    if (!this.taskFormGroup || this.taskFormGroup.invalid) return;
 
     const date = new Date();
     const savedDate = this.datePipe.transform(date, 'dd-MM-yyyy');
-    const taskData = {
+    const taskData: Task = {
       ...this.taskFormGroup.value,
       createdOn: savedDate
     };
 
-    if (this.editingTask) {
-      this.taskService.editTask(this.editingTask.id, taskData).subscribe(() => {
-        this.loadTasks();
+    const saveSub = (this.editingTask
+        ? this.taskService.editTask(this.editingTask.id, taskData)
+        : this.taskService.addTask(taskData)
+    ).pipe(
+      switchMap(() => this.taskService.getTasks())
+    ).subscribe({
+      next: (data) => {
+        this.tasks = data;
+        this.filteredTasks = [...this.tasks];
         this.closeTaskForm();
-      });
-    } else {
-      this.taskService.addTask(taskData).subscribe(() => {
-        this.loadTasks();
-        this.closeTaskForm();
-      });
-    }
+      },
+      error: (err) => console.error('Error saving task:', err)
+    });
+
+    this.subscriptions.add(saveSub);
   }
 
-  editTask(task: any) {
+  editTask(task: Task) {
     this.openTaskForm(task);
   }
 
   deleteTask(id: number) {
     const confirmed = window.confirm("Are you sure you want to delete this task?");
     if (confirmed) {
-      this.taskService.deleteTask(id.toString()).subscribe(() => {
-        this.loadTasks();
+      const deleteSub = this.taskService.deleteTask(id.toString()).pipe(
+        switchMap(() => this.taskService.getTasks())
+      ).subscribe({
+        next: (data) => {
+          this.tasks = data;
+          this.filteredTasks = [...this.tasks];
+        },
+        error: (err) => console.error('Error deleting task:', err)
       });
+
+      this.subscriptions.add(deleteSub);
     }
   }
 
   viewTaskDetails(taskId: number) {
-    this.taskService.getTaskById(taskId.toString()).subscribe((task) => {
-      this.selectedTask = task;
-      this.showTaskDetails = true;
-    }, error => console.error('Error loading task details:', error));
+    const detailsSub = this.taskService.getTaskById(taskId.toString()).subscribe({
+      next: (task: Task) => {
+        this.selectedTask = task;
+        this.showTaskDetails = true;
+      },
+      error: (err) => console.error('Error loading task details:', err)
+    });
+
+    this.subscriptions.add(detailsSub);
   }
 
   closeTaskDetails() {
     this.showTaskDetails = false;
     this.selectedTask = null;
+  }
+
+  ngOnDestroy() {
+    this.subscriptions.unsubscribe();
   }
 }

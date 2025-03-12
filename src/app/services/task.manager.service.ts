@@ -1,6 +1,7 @@
-import {HttpClient, HttpErrorResponse} from '@angular/common/http';
+import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import {catchError, throwError} from 'rxjs';
+import { catchError, throwError, Observable } from 'rxjs';
+import { Task } from '../models/task.model';
 
 @Injectable({
   providedIn: 'root'
@@ -19,32 +20,32 @@ export class TaskManagerService {
     return throwError('Something went wrong; please try again later.');
   }
 
-  getTasks() {
-    return this.http.get('/api/tasks').pipe(
+  getTasks(): Observable<Task[]> {
+    return this.http.get<Task[]>('/api/tasks').pipe(
       catchError(this.handleError)
     );
   }
 
-  addTask(task: any) {
-    return this.http.post('/api/tasks', task).pipe(
+  getTaskById(id: string): Observable<Task> {
+    return this.http.get<Task>(`/api/tasks/${id}`).pipe(
       catchError(this.handleError)
     );
   }
 
-  editTask(id: string, task: any) {
-    return this.http.put(`/api/tasks/${id}`, task).pipe(
+  addTask(task: Task): Observable<Task> {
+    return this.http.post<Task>('/api/tasks', task).pipe(
       catchError(this.handleError)
     );
   }
 
-  deleteTask(id: string) {
-    return this.http.delete(`/api/tasks/${id}`).pipe(
+  editTask(id: number, task: Task): Observable<Task> {
+    return this.http.put<Task>(`/api/tasks/${id}`, task).pipe(
       catchError(this.handleError)
     );
   }
 
-  getTaskById(id: string) {
-    return this.http.get(`/api/tasks/${id}`).pipe(
+  deleteTask(id: string): Observable<void> {
+    return this.http.delete<void>(`/api/tasks/${id}`).pipe(
       catchError(this.handleError)
     );
   }
