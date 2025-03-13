@@ -4,6 +4,7 @@ import { Component } from '@angular/core';
   selector: 'app-welcome',
   templateUrl: './welcome.component.html',
   imports: [],
+  standalone: true,
   styleUrl: './welcome.component.scss'
 })
 export class WelcomeComponent {
