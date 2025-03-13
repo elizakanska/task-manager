@@ -1,10 +1,10 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { SharedModule } from '../../modules/shared/shared.module';
-import { DatePipe } from '@angular/common';
-import { TaskManagerService } from '../../services/task.manager.service';
-import { Subscription, switchMap } from 'rxjs';
-import { Task } from '../../models/task.model';
+import {Component, OnDestroy, OnInit} from '@angular/core';
+import {FormBuilder, FormGroup, Validators} from '@angular/forms';
+import {SharedModule} from '../../modules/shared/shared.module';
+import {DatePipe} from '@angular/common';
+import {TaskManagerService} from '../../services/task.manager.service';
+import {Subscription, switchMap} from 'rxjs';
+import {Task} from '../../models/task.model';
 
 @Component({
   selector: 'app-tasks',

@@ -1,4 +1,4 @@
-import { Routes } from '@angular/router';
+import {Routes} from '@angular/router';
 import {WelcomeComponent} from './pages/welcome/welcome.component';
 import {TasksComponent} from './pages/tasks/tasks.component';
 

@@ -1,7 +1,7 @@
-import { HttpClient, HttpErrorResponse } from '@angular/common/http';
-import { Injectable } from '@angular/core';
-import { catchError, throwError, Observable } from 'rxjs';
-import { Task } from '../models/task.model';
+import {HttpClient, HttpErrorResponse} from '@angular/common/http';
+import {Injectable} from '@angular/core';
+import {catchError, Observable, throwError} from 'rxjs';
+import {Task} from '../models/task.model';
 
 @Injectable({
   providedIn: 'root'
