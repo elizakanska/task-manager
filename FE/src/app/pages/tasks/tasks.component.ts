@@ -108,11 +108,9 @@ export class TasksComponent implements OnInit, OnDestroy {
   saveTask() {
     if (!this.taskFormGroup || this.taskFormGroup.invalid) return;
 
-    const date = new Date();
-    const savedDate = this.datePipe.transform(date, 'dd-MM-yyyy');
     const taskData: Task = {
       ...this.taskFormGroup.value,
-      createdOn: savedDate
+      createdOn: new Date()
     };
 
     const saveSub = (this.editingTask

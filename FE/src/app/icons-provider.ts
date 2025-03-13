@@ -1,3 +1,3 @@
-import {CheckSquareOutline, HomeOutline, MenuFoldOutline, MenuUnfoldOutline} from '@ant-design/icons-angular/icons';
+import {CheckSquareOutline, HomeOutline, MenuFoldOutline, MenuUnfoldOutline, PlusCircleOutline} from '@ant-design/icons-angular/icons';
 
-export const icons = [MenuFoldOutline, MenuUnfoldOutline, HomeOutline, CheckSquareOutline];
+export const icons = [MenuFoldOutline, MenuUnfoldOutline, HomeOutline, CheckSquareOutline, PlusCircleOutline];

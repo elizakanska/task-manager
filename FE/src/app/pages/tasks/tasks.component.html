@@ -61,8 +61,10 @@
         <nz-form-item>
           <nz-form-control nzHasFeedback nzErrorTip="Please select a type!">
             <nz-select formControlName="type" nzPlaceHolder="Select Type">
-              <nz-option nzValue="TASK" nzLabel="Task"></nz-option>
-              <nz-option nzValue="BUG" nzLabel="Bug"></nz-option>
+              <nz-option nzValue="Bug" nzLabel="Bug"></nz-option>
+              <nz-option nzValue="Feature" nzLabel="Feature"></nz-option>
+              <nz-option nzValue="Improvement" nzLabel="Improvement"></nz-option>
+              <nz-option nzValue="Maintenance" nzLabel="Maintenance"></nz-option>
             </nz-select>
           </nz-form-control>
         </nz-form-item>
@@ -70,9 +72,9 @@
         <nz-form-item>
           <nz-form-control nzHasFeedback nzErrorTip="Invalid status!">
             <nz-select formControlName="status" nzPlaceHolder="Select Status">
-              <nz-option nzValue="PENDING" nzLabel="Pending"></nz-option>
-              <nz-option nzValue="IN_PROGRESS" nzLabel="In Progress"></nz-option>
-              <nz-option nzValue="COMPLETED" nzLabel="Completed"></nz-option>
+              <nz-option nzValue="Open" nzLabel="Open"></nz-option>
+              <nz-option nzValue="WIP" nzLabel="Work In Progress"></nz-option>
+              <nz-option nzValue="Completed" nzLabel="Completed"></nz-option>
             </nz-select>
           </nz-form-control>
         </nz-form-item>
@@ -114,7 +116,7 @@
       <p><strong>Description:</strong> {{ selectedTask?.description }}</p>
       <p><strong>Type:</strong> {{ selectedTask?.type }}</p>
       <p><strong>Status:</strong> {{ selectedTask?.status }}</p>
-      <p><strong>Created On:</strong> {{ selectedTask?.createdOn }}</p>
+      <p><strong>Created On:</strong> {{ selectedTask?.createdOn | date:'dd-MMM-yyyy' }}</p>
       <button nz-button nzType="default" (click)="closeTaskDetails()">Close</button>
     </div>
   </div>

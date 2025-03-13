@@ -6,8 +6,8 @@ import com.kanskaeliza.taskmanager.entity.enums.TaskStatus;
 import com.kanskaeliza.taskmanager.repository.TaskRepository;
 import com.kanskaeliza.taskmanager.service.TaskService;
 import com.kanskaeliza.taskmanager.mapper.TaskMapper;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -16,10 +16,14 @@ import java.util.stream.Collectors;
 
 @Slf4j
 @Service
-@RequiredArgsConstructor
 public class TaskServiceImpl implements TaskService {
   private final TaskRepository repository;
   private final TaskMapper mapper;
+
+  public TaskServiceImpl(TaskRepository repository, @Qualifier("taskMapperImpl") TaskMapper mapper) {
+    this.repository = repository;
+    this.mapper = mapper;
+  }
 
   @Override
   public List<Task> getAllTasks() {
@@ -35,7 +39,7 @@ public class TaskServiceImpl implements TaskService {
 
   @Override
   public Task saveTask(Task task) {
-    if (task == null || task.getTitle().isBlank() || task.getDescription().isBlank() || task.getCreated_on() == null) {
+    if (task == null || task.getTitle().isBlank() || task.getDescription().isBlank() || task.getCreatedOn() == null) {
       throw new IllegalArgumentException("Invalid task data");
     }
 
@@ -50,7 +54,7 @@ public class TaskServiceImpl implements TaskService {
     return repository.findById(id).map(existingTask -> {
       existingTask.setTitle(task.getTitle());
       existingTask.setDescription(task.getDescription());
-      existingTask.setCreated_on(task.getCreated_on());
+      existingTask.setCreatedOn(task.getCreatedOn());
       existingTask.setType(task.getType());
       existingTask.setStatus(task.getStatus());
       TaskDTO updatedTask = repository.save(existingTask);

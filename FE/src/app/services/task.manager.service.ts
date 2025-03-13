@@ -21,31 +21,31 @@ export class TaskManagerService {
   }
 
   getTasks(): Observable<Task[]> {
-    return this.http.get<Task[]>('/api/tasks').pipe(
+    return this.http.get<Task[]>('http://localhost:8080/api/tasks').pipe(
       catchError(this.handleError)
     );
   }
 
   getTaskById(id: string): Observable<Task> {
-    return this.http.get<Task>(`/api/tasks/${id}`).pipe(
+    return this.http.get<Task>(`http://localhost:8080/api/tasks/${id}`).pipe(
       catchError(this.handleError)
     );
   }
 
   addTask(task: Task): Observable<Task> {
-    return this.http.post<Task>('/api/tasks', task).pipe(
+    return this.http.post<Task>('http://localhost:8080/api/tasks', task).pipe(
       catchError(this.handleError)
     );
   }
 
   editTask(id: number, task: Task): Observable<Task> {
-    return this.http.put<Task>(`/api/tasks/${id}`, task).pipe(
+    return this.http.put<Task>(`http://localhost:8080/api/tasks/${id}`, task).pipe(
       catchError(this.handleError)
     );
   }
 
   deleteTask(id: string): Observable<void> {
-    return this.http.delete<void>(`/api/tasks/${id}`).pipe(
+    return this.http.delete<void>(`http://localhost:8080/api/tasks/${id}`).pipe(
       catchError(this.handleError)
     );
   }

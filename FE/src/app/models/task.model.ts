@@ -4,5 +4,5 @@ export interface Task {
   description: string;
   type: string;
   status: string;
-  createdOn: string;
+  createdOn: Date;
 }
