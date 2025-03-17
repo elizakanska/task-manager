@@ -1,7 +1,6 @@
 package com.kanskaeliza.taskmanager.service;
 
 import com.kanskaeliza.taskmanager.entity.Task;
-import com.kanskaeliza.taskmanager.entity.enums.TaskStatus;
 
 import java.util.List;
 import java.util.Optional;
@@ -17,5 +16,9 @@ public interface TaskService {
 
   void deleteTaskById(Long id);
 
-  Optional<Task> changeStatus(Long id, TaskStatus status);
+  Optional<Task> changeStatus(Long id, String status);
+
+  List<String> getTaskTypes();
+
+  List<String> getTaskStatuses();
 }

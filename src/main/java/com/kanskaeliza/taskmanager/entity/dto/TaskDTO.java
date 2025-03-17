@@ -1,7 +1,5 @@
 package com.kanskaeliza.taskmanager.entity.dto;
 
-import com.kanskaeliza.taskmanager.entity.enums.TaskStatus;
-import com.kanskaeliza.taskmanager.entity.enums.TaskType;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -22,10 +20,8 @@ public class TaskDTO {
   private String title;
   private String description;
 
-  @Enumerated(EnumType.STRING)
-  private TaskType type;
-  @Enumerated(EnumType.STRING)
-  private TaskStatus status;
+  private String type;
+  private String status;
 
   @Column(name = "created_on")
   private Date createdOn;

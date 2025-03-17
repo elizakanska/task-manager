@@ -59,23 +59,38 @@
         </nz-form-item>
 
         <nz-form-item>
-          <nz-form-control nzHasFeedback nzErrorTip="Please select a type!">
-            <nz-select formControlName="type" nzPlaceHolder="Select Type">
-              <nz-option nzValue="Bug" nzLabel="Bug"></nz-option>
-              <nz-option nzValue="Feature" nzLabel="Feature"></nz-option>
-              <nz-option nzValue="Improvement" nzLabel="Improvement"></nz-option>
-              <nz-option nzValue="Maintenance" nzLabel="Maintenance"></nz-option>
+          <nz-form-control nzHasFeedback nzErrorTip="Please select or enter a type!">
+            <nz-select
+              formControlName="type"
+              nzPlaceHolder="Select or enter Type"
+              [nzDropdownRender]="typeTemplate"
+              (nzOnSearch)="onSearchType($event)">
+              <nz-option *ngFor="let option of typeOptions" [nzValue]="option" [nzLabel]="option"></nz-option>
             </nz-select>
+            <ng-template #typeTemplate>
+              <input nz-input [(ngModel)]="newType" placeholder="Add new type" [ngModelOptions]="{standalone: true}"/>
+              <button nz-button nzType="link" (click)="addNewType()">
+                + Add "{{ newType }}"
+              </button>
+            </ng-template>
           </nz-form-control>
         </nz-form-item>
 
         <nz-form-item>
-          <nz-form-control nzHasFeedback nzErrorTip="Invalid status!">
-            <nz-select formControlName="status" nzPlaceHolder="Select Status">
-              <nz-option nzValue="Open" nzLabel="Open"></nz-option>
-              <nz-option nzValue="WIP" nzLabel="Work In Progress"></nz-option>
-              <nz-option nzValue="Completed" nzLabel="Completed"></nz-option>
+          <nz-form-control nzHasFeedback nzErrorTip="Please select or enter a status!">
+            <nz-select
+              formControlName="status"
+              nzPlaceHolder="Select or enter Status"
+              [nzDropdownRender]="statusTemplate"
+              (nzOnSearch)="onSearchStatus($event)">
+              <nz-option *ngFor="let option of statusOptions" [nzValue]="option" [nzLabel]="option"></nz-option>
             </nz-select>
+            <ng-template #statusTemplate>
+              <input nz-input [(ngModel)]="newStatus" placeholder="Add new status" [ngModelOptions]="{standalone: true}"/>
+              <button nz-button nzType="link" (click)="addNewStatus()">
+                + Add "{{ newStatus }}"
+              </button>
+            </ng-template>
           </nz-form-control>
         </nz-form-item>
 

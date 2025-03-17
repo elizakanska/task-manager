@@ -2,7 +2,6 @@ package com.kanskaeliza.taskmanager.service.impl;
 
 import com.kanskaeliza.taskmanager.entity.Task;
 import com.kanskaeliza.taskmanager.entity.dto.TaskDTO;
-import com.kanskaeliza.taskmanager.entity.enums.TaskStatus;
 import com.kanskaeliza.taskmanager.repository.TaskRepository;
 import com.kanskaeliza.taskmanager.service.TaskService;
 import com.kanskaeliza.taskmanager.mapper.TaskMapper;
@@ -73,11 +72,21 @@ public class TaskServiceImpl implements TaskService {
   }
 
   @Override
-  public Optional<Task> changeStatus(Long id, TaskStatus status) {
+  public Optional<Task> changeStatus(Long id, String status) {
     return repository.findById(id).map(existingTask -> {
-      existingTask.setStatus(status);
+      existingTask.setStatus(String.valueOf(status));
       TaskDTO updatedTask = repository.save(existingTask);
       return mapper.toTask(updatedTask);
     });
+  }
+
+  @Override
+  public List<String> getTaskTypes() {
+    return List.of("Bug", "Feature", "Improvement", "Maintenance");
+  }
+
+  @Override
+  public List<String> getTaskStatuses() {
+    return List.of("Open", "Completed", "WIP");
   }
 }

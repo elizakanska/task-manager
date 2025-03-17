@@ -1,7 +1,6 @@
 package com.kanskaeliza.taskmanager.controller;
 
 import com.kanskaeliza.taskmanager.entity.Task;
-import com.kanskaeliza.taskmanager.entity.enums.TaskStatus;
 import com.kanskaeliza.taskmanager.service.TaskService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -12,7 +11,6 @@ import java.util.Map;
 
 @RequestMapping("/api")
 @RequiredArgsConstructor
-@CrossOrigin(origins = "http://localhost:4200")
 @RestController
 public class TaskController {
   private final TaskService service;
@@ -63,14 +61,24 @@ public class TaskController {
     if (statusValue == null) {
       return ResponseEntity.badRequest().build();
     }
-    TaskStatus status;
-    try {
-      status = TaskStatus.valueOf(statusValue.toUpperCase());
-    } catch (IllegalArgumentException e) {
-      return ResponseEntity.badRequest().build();
-    }
+
+    String status = statusValue.toUpperCase();
+
     return service.changeStatus(id, status)
       .map(ResponseEntity::ok)
       .orElse(ResponseEntity.notFound().build());
   }
+
+  @GetMapping("/task-types")
+  public ResponseEntity<List<String>> getTaskTypes() {
+    List<String> types = service.getTaskTypes();
+    return ResponseEntity.ok(types);
+  }
+
+  @GetMapping("/task-statuses")
+  public ResponseEntity<List<String>> getTaskStatuses() {
+    List<String> statuses = service.getTaskStatuses();
+    return ResponseEntity.ok(statuses);
+  }
+
 }

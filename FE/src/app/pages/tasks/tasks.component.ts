@@ -1,10 +1,10 @@
-import {Component, OnDestroy, OnInit} from '@angular/core';
-import {FormBuilder, FormGroup, Validators} from '@angular/forms';
-import {SharedModule} from '../../modules/shared/shared.module';
-import {DatePipe} from '@angular/common';
-import {TaskManagerService} from '../../services/task.manager.service';
-import {Subscription, switchMap} from 'rxjs';
-import {Task} from '../../models/task.model';
+import { Component, OnDestroy, OnInit } from '@angular/core';
+import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { SharedModule } from '../../modules/shared/shared.module';
+import { DatePipe } from '@angular/common';
+import { TaskManagerService } from '../../services/task.manager.service';
+import { Subscription, switchMap } from 'rxjs';
+import { Task } from '../../models/task.model';
 
 @Component({
   selector: 'app-tasks',
@@ -22,6 +22,10 @@ export class TasksComponent implements OnInit, OnDestroy {
   searchQuery: string = '';
   selectedTask: Task | null = null;
   showTaskDetails = false;
+  typeOptions: string[] = ['Bug', 'Feature', 'Improvement', 'Maintenance'];
+  statusOptions: string[] = ['Open', 'WIP', 'Completed'];
+  newType: string = '';
+  newStatus: string = '';
   private subscriptions = new Subscription();
 
   constructor(
@@ -137,7 +141,7 @@ export class TasksComponent implements OnInit, OnDestroy {
   deleteTask(id: number) {
     const confirmed = window.confirm("Are you sure you want to delete this task?");
     if (confirmed) {
-      const deleteSub = this.taskService.deleteTask(id.toString()).pipe(
+      const deleteSub = this.taskService.deleteTask(id).pipe(
         switchMap(() => this.taskService.getTasks())
       ).subscribe({
         next: (data) => {
@@ -152,7 +156,7 @@ export class TasksComponent implements OnInit, OnDestroy {
   }
 
   viewTaskDetails(taskId: number) {
-    const detailsSub = this.taskService.getTaskById(taskId.toString()).subscribe({
+    const detailsSub = this.taskService.getTaskById(taskId).subscribe({
       next: (task: Task) => {
         this.selectedTask = task;
         this.showTaskDetails = true;
@@ -166,6 +170,30 @@ export class TasksComponent implements OnInit, OnDestroy {
   closeTaskDetails() {
     this.showTaskDetails = false;
     this.selectedTask = null;
+  }
+
+  onSearchType(value: string): void {
+    this.newType = value;
+  }
+
+  onSearchStatus(value: string): void {
+    this.newStatus = value;
+  }
+
+  addNewType(): void {
+    if (this.newType && !this.typeOptions.includes(this.newType)) {
+      this.typeOptions.push(this.newType);
+      this.taskFormGroup.get('type')?.setValue(this.newType);
+      this.newType = '';
+    }
+  }
+
+  addNewStatus(): void {
+    if (this.newStatus && !this.statusOptions.includes(this.newStatus)) {
+      this.statusOptions.push(this.newStatus);
+      this.taskFormGroup.get('status')?.setValue(this.newStatus);
+      this.newStatus = '';
+    }
   }
 
   ngOnDestroy() {

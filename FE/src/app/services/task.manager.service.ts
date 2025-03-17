@@ -26,7 +26,7 @@ export class TaskManagerService {
     );
   }
 
-  getTaskById(id: string): Observable<Task> {
+  getTaskById(id: number): Observable<Task> {
     return this.http.get<Task>(`http://localhost:8080/api/tasks/${id}`).pipe(
       catchError(this.handleError)
     );
@@ -44,7 +44,7 @@ export class TaskManagerService {
     );
   }
 
-  deleteTask(id: string): Observable<void> {
+  deleteTask(id: number): Observable<void> {
     return this.http.delete<void>(`http://localhost:8080/api/tasks/${id}`).pipe(
       catchError(this.handleError)
     );
