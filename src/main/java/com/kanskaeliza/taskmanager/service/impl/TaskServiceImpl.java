@@ -5,6 +5,8 @@ import com.kanskaeliza.taskmanager.entity.dto.TaskDTO;
 import com.kanskaeliza.taskmanager.repository.TaskRepository;
 import com.kanskaeliza.taskmanager.service.TaskService;
 import com.kanskaeliza.taskmanager.mapper.TaskMapper;
+import com.kanskaeliza.taskmanager.entity.enums.TaskType;
+import com.kanskaeliza.taskmanager.entity.enums.TaskStatus;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
@@ -12,6 +14,7 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Slf4j
 @Service
@@ -82,11 +85,15 @@ public class TaskServiceImpl implements TaskService {
 
   @Override
   public List<String> getTaskTypes() {
-    return List.of("Bug", "Feature", "Improvement", "Maintenance");
+    return Stream.of(TaskType.values())
+      .map(TaskType::getLabel)
+      .collect(Collectors.toList());
   }
 
   @Override
   public List<String> getTaskStatuses() {
-    return List.of("Open", "Completed", "WIP");
+    return Stream.of(TaskStatus.values())
+      .map(TaskStatus::getLabel)
+      .collect(Collectors.toList());
   }
 }

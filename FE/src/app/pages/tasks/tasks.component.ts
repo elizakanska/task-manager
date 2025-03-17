@@ -21,8 +21,8 @@ export class TasksComponent implements OnInit, OnDestroy {
   searchQuery: string = '';
   selectedTask: Task | null = null;
   showTaskDetails = false;
-  typeOptions: string[] = ['Bug', 'Feature', 'Improvement', 'Maintenance'];
-  statusOptions: string[] = ['Open', 'WIP', 'Completed'];
+  typeOptions: string[] = [];
+  statusOptions: string[] = [];
   newType: string = '';
   newStatus: string = '';
   private subscriptions = new Subscription();
@@ -51,7 +51,25 @@ export class TasksComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit() {
+    this.loadTaskTypesAndStatuses();
     this.loadTasks();
+  }
+
+  loadTaskTypesAndStatuses() {
+    const typesSub = this.taskService.getTaskTypes().subscribe({
+      next: (data) => {
+        this.typeOptions = data;
+      },
+      error: (err) => console.error('Error loading task types:', err)
+    });
+    const statusesSub = this.taskService.getTaskStatuses().subscribe({
+      next: (data) => {
+        this.statusOptions = data;
+      },
+      error: (err) => console.error('Error loading task statuses:', err)
+    });
+    this.subscriptions.add(typesSub);
+    this.subscriptions.add(statusesSub);
   }
 
   loadTasks() {
