@@ -1,7 +1,6 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { SharedModule } from '../../modules/shared/shared.module';
-import { DatePipe } from '@angular/common';
 import { TaskManagerService } from '../../services/task.manager.service';
 import { Subscription, switchMap } from 'rxjs';
 import { Task } from '../../models/task.model';
@@ -30,7 +29,6 @@ export class TasksComponent implements OnInit, OnDestroy {
 
   constructor(
     private fb: FormBuilder,
-    private datePipe: DatePipe,
     private taskService: TaskManagerService
   ) {
     this.taskFormGroup = this.fb.group({
@@ -110,8 +108,15 @@ export class TasksComponent implements OnInit, OnDestroy {
   }
 
   saveTask() {
-    if (!this.taskFormGroup || this.taskFormGroup.invalid) return;
-
+    if (this.taskFormGroup.invalid) {
+      Object.keys(this.taskFormGroup.controls).forEach(key => {
+        const control = this.taskFormGroup.get(key);
+        if (control && control.invalid) {
+          control.markAsTouched();
+        }
+      });
+      return;
+    }
     const taskData: Task = {
       ...this.taskFormGroup.value,
       createdOn: new Date()
