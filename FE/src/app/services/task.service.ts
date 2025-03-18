@@ -2,13 +2,12 @@ import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { catchError, Observable, throwError } from 'rxjs';
 import { Task } from '../models/task.model';
+import { API_URL } from '../constants/constants';
 
 @Injectable({
   providedIn: 'root'
 })
-export class TaskManagerService {
-
-  private apiUrl = 'http://localhost:8080/api'; // Make sure this matches your backend URL
+export class TaskService {
 
   constructor(private http: HttpClient) { }
 
@@ -23,43 +22,43 @@ export class TaskManagerService {
   }
 
   getTasks(): Observable<Task[]> {
-    return this.http.get<Task[]>(`${this.apiUrl}/tasks`).pipe(
+    return this.http.get<Task[]>(`${API_URL}/tasks`).pipe(
       catchError(this.handleError)
     );
   }
 
   getTaskById(id: number): Observable<Task> {
-    return this.http.get<Task>(`${this.apiUrl}/tasks/${id}`).pipe(
+    return this.http.get<Task>(`${API_URL}/tasks/${id}`).pipe(
       catchError(this.handleError)
     );
   }
 
   addTask(task: Task): Observable<Task> {
-    return this.http.post<Task>(`${this.apiUrl}/tasks`, task).pipe(
+    return this.http.post<Task>(`${API_URL}/tasks`, task).pipe(
       catchError(this.handleError)
     );
   }
 
   editTask(id: number, task: Task): Observable<Task> {
-    return this.http.put<Task>(`${this.apiUrl}/tasks/${id}`, task).pipe(
+    return this.http.put<Task>(`${API_URL}/tasks/${id}`, task).pipe(
       catchError(this.handleError)
     );
   }
 
   deleteTask(id: number): Observable<void> {
-    return this.http.delete<void>(`${this.apiUrl}/tasks/${id}`).pipe(
+    return this.http.delete<void>(`${API_URL}/tasks/${id}`).pipe(
       catchError(this.handleError)
     );
   }
 
   getTaskTypes(): Observable<string[]> {
-    return this.http.get<string[]>(`${this.apiUrl}/task-types`).pipe(
+    return this.http.get<string[]>(`${API_URL}/task-types`).pipe(
       catchError(this.handleError)
     );
   }
 
   getTaskStatuses(): Observable<string[]> {
-    return this.http.get<string[]>(`${this.apiUrl}/task-statuses`).pipe(
+    return this.http.get<string[]>(`${API_URL}/task-statuses`).pipe(
       catchError(this.handleError)
     );
   }

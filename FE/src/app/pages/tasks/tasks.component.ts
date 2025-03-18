@@ -1,7 +1,7 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { SharedModule } from '../../modules/shared/shared.module';
-import { TaskManagerService } from '../../services/task.manager.service';
+import { TaskService } from '../../services/task.service';
 import { Subscription, switchMap } from 'rxjs';
 import { Task } from '../../models/task.model';
 
@@ -29,7 +29,7 @@ export class TasksComponent implements OnInit, OnDestroy {
 
   constructor(
     private fb: FormBuilder,
-    private taskService: TaskManagerService
+    private taskService: TaskService
   ) {
     this.taskFormGroup = this.fb.group({
       title: ['', [Validators.required, Validators.minLength(3), Validators.maxLength(50)]],
