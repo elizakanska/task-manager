@@ -2,13 +2,14 @@ import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { catchError, Observable, throwError } from 'rxjs';
 import { Task } from '../models/task.model';
+import { API_URL } from '../constants/constants';
 
 @Injectable({
   providedIn: 'root'
 })
-export class TaskManagerService {
+export class TaskService {
 
-  private apiUrl = 'http://localhost:8080/api'; // Make sure this matches your backend URL
+  private apiUrl = API_URL;
 
   constructor(private http: HttpClient) { }
 
