@@ -1,7 +1,7 @@
 package com.kanskaeliza.taskmanager.service.impl;
 
-import com.kanskaeliza.taskmanager.entity.Task;
 import com.kanskaeliza.taskmanager.entity.dto.TaskDTO;
+import com.kanskaeliza.taskmanager.entity.Task;
 import com.kanskaeliza.taskmanager.repository.TaskRepository;
 import com.kanskaeliza.taskmanager.service.TaskService;
 import com.kanskaeliza.taskmanager.mapper.TaskMapper;
@@ -28,39 +28,39 @@ public class TaskServiceImpl implements TaskService {
   }
 
   @Override
-  public List<Task> getAllTasks() {
-    List<TaskDTO> taskDTOs = repository.findAll();
-    return taskDTOs.stream().map(mapper::toTask).collect(Collectors.toList());
+  public List<TaskDTO> getAllTasks() {
+    List<Task> tasks = repository.findAll();
+    return tasks.stream().map(mapper::fromTask).collect(Collectors.toList());
   }
 
   @Override
-  public Optional<Task> getTaskById(Long id) {
+  public Optional<TaskDTO> getTaskById(Long id) {
     log.info("Looking for task with id {}.", id);
-    return repository.findById(id).map(mapper::toTask);
+    return repository.findById(id).map(mapper::fromTask);
   }
 
   @Override
-  public Task saveTask(Task task) {
-    if (task == null || task.getTitle().isBlank() || task.getDescription().isBlank() || task.getCreatedOn() == null) {
+  public TaskDTO saveTask(TaskDTO taskdto) {
+    if (taskdto == null || taskdto.getTitle().isBlank() || taskdto.getDescription().isBlank() || taskdto.getCreatedOn() == null) {
       throw new IllegalArgumentException("Invalid task data");
     }
 
-    TaskDTO taskDTO = mapper.toDto(task);
-    taskDTO = repository.save(taskDTO);
+    Task task = mapper.fromDto(taskdto);
+    task = repository.save(task);
 
-    return mapper.toTask(taskDTO);
+    return mapper.fromTask(task);
   }
 
   @Override
-  public Optional<Task> editTaskById(Long id, Task task) {
+  public Optional<TaskDTO> editTaskById(Long id, TaskDTO taskdto) {
     return repository.findById(id).map(existingTask -> {
-      existingTask.setTitle(task.getTitle());
-      existingTask.setDescription(task.getDescription());
-      existingTask.setCreatedOn(task.getCreatedOn());
-      existingTask.setType(task.getType());
-      existingTask.setStatus(task.getStatus());
-      TaskDTO updatedTask = repository.save(existingTask);
-      return mapper.toTask(updatedTask);
+      existingTask.setTitle(taskdto.getTitle());
+      existingTask.setDescription(taskdto.getDescription());
+      existingTask.setCreatedOn(taskdto.getCreatedOn());
+      existingTask.setType(taskdto.getType());
+      existingTask.setStatus(taskdto.getStatus());
+      Task updatedTask = repository.save(existingTask);
+      return mapper.fromTask(updatedTask);
     });
   }
 
@@ -75,11 +75,11 @@ public class TaskServiceImpl implements TaskService {
   }
 
   @Override
-  public Optional<Task> changeStatus(Long id, String status) {
+  public Optional<TaskDTO> changeStatus(Long id, String status) {
     return repository.findById(id).map(existingTask -> {
       existingTask.setStatus(String.valueOf(status));
-      TaskDTO updatedTask = repository.save(existingTask);
-      return mapper.toTask(updatedTask);
+      Task updatedTask = repository.save(existingTask);
+      return mapper.fromTask(updatedTask);
     });
   }
 

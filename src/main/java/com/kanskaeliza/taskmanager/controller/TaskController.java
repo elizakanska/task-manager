@@ -1,6 +1,6 @@
 package com.kanskaeliza.taskmanager.controller;
 
-import com.kanskaeliza.taskmanager.entity.Task;
+import com.kanskaeliza.taskmanager.entity.dto.TaskDTO;
 import com.kanskaeliza.taskmanager.service.TaskService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -16,32 +16,32 @@ public class TaskController {
   private final TaskService service;
 
   @GetMapping("/tasks")
-  public ResponseEntity<List<Task>> getAllTasks() {
+  public ResponseEntity<List<TaskDTO>> getAllTasks() {
     return ResponseEntity.ok(service.getAllTasks());
   }
 
   @GetMapping("/tasks/{id}")
-  public ResponseEntity<Task> getTaskById(@PathVariable Long id) {
+  public ResponseEntity<TaskDTO> getTaskById(@PathVariable Long id) {
     return service.getTaskById(id)
       .map(ResponseEntity::ok)
       .orElse(ResponseEntity.notFound().build());
   }
 
   @PostMapping("/tasks")
-  public ResponseEntity<Task> createTask(@RequestBody Task task) {
-    if (task == null) {
+  public ResponseEntity<TaskDTO> createTask(@RequestBody TaskDTO taskdto) {
+    if (taskdto == null) {
       return ResponseEntity.badRequest().build();
     }
-    Task savedTask = service.saveTask(task);
-    return ResponseEntity.status(201).body(savedTask);
+    TaskDTO savedTaskDTO = service.saveTask(taskdto);
+    return ResponseEntity.status(201).body(savedTaskDTO);
   }
 
   @PutMapping("/tasks/{id}")
-  public ResponseEntity<Task> updateTask(@PathVariable Long id, @RequestBody Task task) {
-    if (task == null) {
+  public ResponseEntity<TaskDTO> updateTask(@PathVariable Long id, @RequestBody TaskDTO taskdto) {
+    if (taskdto == null) {
       return ResponseEntity.badRequest().build();
     }
-    return service.editTaskById(id, task)
+    return service.editTaskById(id, taskdto)
       .map(ResponseEntity::ok)
       .orElse(ResponseEntity.notFound().build());
   }
@@ -56,7 +56,7 @@ public class TaskController {
   }
 
   @PatchMapping("/tasks/{id}/status")
-  public ResponseEntity<Task> updateTaskStatus(@PathVariable Long id, @RequestBody Map<String, String> task) {
+  public ResponseEntity<TaskDTO> updateTaskStatus(@PathVariable Long id, @RequestBody Map<String, String> task) {
     String statusValue = task.get("status");
     if (statusValue == null) {
       return ResponseEntity.badRequest().build();

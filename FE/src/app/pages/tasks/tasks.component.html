@@ -4,7 +4,7 @@
   <input
     type="text"
     [(ngModel)]="searchQuery"
-    placeholder="Search by task description"
+    placeholder="Search by taskdto description"
     class="search-bar"
     (input)="searchTasks()"/>
 
@@ -22,16 +22,16 @@
     </tr>
     </thead>
     <tbody>
-    <tr *ngFor="let task of filteredTasks; trackBy: trackByTaskId">
-      <td><a (click)="viewTaskDetails(task.id)">{{ task.title }}</a></td>
-      <td>{{ task.status }}</td>
+    <tr *ngFor="let taskdto of filteredTasks; trackBy: trackByTaskId">
+      <td><a (click)="viewTaskDetails(taskdto.id)">{{ taskdto.title }}</a></td>
+      <td>{{ taskdto.status }}</td>
       <td>
-        <button (click)="editTask(task)" class="btn btn-warning">
+        <button (click)="editTask(taskdto)" class="btn btn-warning">
           <span nz-icon nzType="edit"></span>
           <span> Edit</span>
         </button>
 
-        <button (click)="deleteTask(task.id)" class="btn btn-danger">
+        <button (click)="deleteTask(taskdto.id)" class="btn btn-danger">
           <span nz-icon nzType="delete"></span>
           <span> Delete</span>
         </button>
