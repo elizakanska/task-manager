@@ -1,0 +1,109 @@
+<div class="container">
+  <h2>User Manager</h2>
+
+  <input
+    type="text"
+    [(ngModel)]="searchQuery"
+    placeholder="Search by name"
+    class="search-bar"
+    (input)="searchUsers()"/>
+
+  <button (click)="openUserForm()" class="btn btn-primary">
+    <span nz-icon nzType="plus-circle"></span>
+    <span> Add New User</span>
+  </button>
+
+  <table class="table">
+    <thead>
+    <tr>
+      <th>Username</th>
+      <th>Full Name</th>
+      <th>Action</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr *ngFor="let user of filteredUsers; trackBy: trackByUserId">
+      <td><a (click)="viewUserDetails(user.id)">{{ user.username }}</a></td>
+      <td>{{ user.firstName }} {{ user.lastName }}</td>
+      <td>
+        <button (click)="editUser(user)" class="btn btn-warning">
+          <span nz-icon nzType="edit"></span>
+          <span> Edit</span>
+        </button>
+
+        <button (click)="deleteUser(user.id)" class="btn btn-danger">
+          <span nz-icon nzType="delete"></span>
+          <span> Delete</span>
+        </button>
+      </td>
+    </tr>
+    </tbody>
+  </table>
+
+  <div class="modal" [ngClass]="{ 'is-visible': showUserForm }">
+    <div class="modal-content custom-form">
+      <form nz-form [formGroup]="userFormGroup" (ngSubmit)="saveUser()">
+
+        <h3>{{ editingUser ? 'User Details' : 'Add User' }}</h3>
+
+        <nz-form-item>
+          <nz-form-control
+            [nzValidateStatus]="userFormGroup.get('username')?.invalid && userFormGroup.get('username')?.touched ? 'error' : ''"
+            nzHasFeedback
+            nzErrorTip="Username is required!">
+            <input nz-input placeholder="Username" formControlName="username"/>
+          </nz-form-control>
+        </nz-form-item>
+
+        <nz-form-item>
+          <nz-form-control
+            [nzValidateStatus]="userFormGroup.get('password')?.invalid && userFormGroup.get('password')?.touched ? 'error' : ''"
+            nzHasFeedback
+            nzErrorTip="Password is required!">
+            <input nz-input type="password" placeholder="Password" formControlName="password"/>
+          </nz-form-control>
+        </nz-form-item>
+
+        <nz-form-item>
+          <nz-form-control
+            [nzValidateStatus]="userFormGroup.get('firstName')?.invalid && userFormGroup.get('firstName')?.touched ? 'error' : ''"
+            nzHasFeedback
+            nzErrorTip="First name is required!">
+            <input nz-input placeholder="First Name" formControlName="firstName"/>
+          </nz-form-control>
+        </nz-form-item>
+
+        <nz-form-item>
+          <nz-form-control
+            [nzValidateStatus]="userFormGroup.get('lastName')?.invalid && userFormGroup.get('lastName')?.touched ? 'error' : ''"
+            nzHasFeedback
+            nzErrorTip="Last name is required!">
+            <input nz-input placeholder="Last Name" formControlName="lastName"/>
+          </nz-form-control>
+        </nz-form-item>
+
+        <button nz-button class="login-form-button login-form-margin" [nzType]="'primary'">
+          {{ editingUser ? 'Update' : 'Create' }}
+        </button>
+
+        <button
+          nz-button
+          class="login-form-button login-form-margin"
+          (click)="closeUserForm(); $event.preventDefault()"
+          nzType="default">
+          Cancel
+        </button>
+
+      </form>
+    </div>
+  </div>
+
+  <div class="modal" [ngClass]="{ 'is-visible': showUserDetails }">
+    <div class="modal-content custom-form">
+      <h3>User Details</h3>
+      <p><strong>Username:</strong> {{ selectedUser?.username }}</p>
+      <p><strong>Full Name:</strong> {{ selectedUser?.firstName }} {{ selectedUser?.lastName }}</p>
+      <button nz-button nzType="default" (click)="closeUserDetails()">Close</button>
+    </div>
+  </div>
+</div>
