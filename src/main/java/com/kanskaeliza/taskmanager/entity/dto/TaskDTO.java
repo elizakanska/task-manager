@@ -13,7 +13,7 @@ public class TaskDTO {
   private Long id;
   private String title;
   private String description;
-  private String type;
-  private String status;
+  private Long typeId;
+  private Long statusId;
   private Date createdOn;
 }

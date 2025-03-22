@@ -2,11 +2,13 @@ package com.kanskaeliza.taskmanager.service.impl;
 
 import com.kanskaeliza.taskmanager.entity.dto.TaskDTO;
 import com.kanskaeliza.taskmanager.entity.Task;
-import com.kanskaeliza.taskmanager.repository.TaskRepository;
-import com.kanskaeliza.taskmanager.service.TaskService;
+import com.kanskaeliza.taskmanager.entity.TaskType;
+import com.kanskaeliza.taskmanager.entity.TaskStatus;
 import com.kanskaeliza.taskmanager.mapper.TaskMapper;
-import com.kanskaeliza.taskmanager.entity.enums.TaskType;
-import com.kanskaeliza.taskmanager.entity.enums.TaskStatus;
+import com.kanskaeliza.taskmanager.repository.StatusRepository;
+import com.kanskaeliza.taskmanager.repository.TaskRepository;
+import com.kanskaeliza.taskmanager.repository.TypeRepository;
+import com.kanskaeliza.taskmanager.service.TaskService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
@@ -14,23 +16,28 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 @Slf4j
 @Service
 public class TaskServiceImpl implements TaskService {
   private final TaskRepository repository;
   private final TaskMapper mapper;
+  private final StatusRepository statusRepository;
+  private final TypeRepository typeRepository;
 
-  public TaskServiceImpl(TaskRepository repository, @Qualifier("taskMapperImpl") TaskMapper mapper) {
+  public TaskServiceImpl(TaskRepository repository, @Qualifier("taskMapperImpl") TaskMapper mapper,
+                         StatusRepository statusRepository, TypeRepository typeRepository) {
     this.repository = repository;
     this.mapper = mapper;
+    this.statusRepository = statusRepository;
+    this.typeRepository = typeRepository;
   }
 
   @Override
   public List<TaskDTO> getAllTasks() {
-    List<Task> tasks = repository.findAll();
-    return tasks.stream().map(mapper::fromTask).collect(Collectors.toList());
+    return repository.findAll().stream()
+      .map(mapper::fromTask)
+      .collect(Collectors.toList());
   }
 
   @Override
@@ -46,8 +53,10 @@ public class TaskServiceImpl implements TaskService {
     }
 
     Task task = mapper.fromDto(taskdto);
-    task = repository.save(task);
+    task.setType(typeRepository.findById(taskdto.getTypeId()).orElseThrow(() -> new IllegalArgumentException("Invalid Type ID")));
+    task.setStatus(statusRepository.findById(taskdto.getStatusId()).orElseThrow(() -> new IllegalArgumentException("Invalid Status ID")));
 
+    task = repository.save(task);
     return mapper.fromTask(task);
   }
 
@@ -57,8 +66,9 @@ public class TaskServiceImpl implements TaskService {
       existingTask.setTitle(taskdto.getTitle());
       existingTask.setDescription(taskdto.getDescription());
       existingTask.setCreatedOn(taskdto.getCreatedOn());
-      existingTask.setType(taskdto.getType());
-      existingTask.setStatus(taskdto.getStatus());
+      existingTask.setType(typeRepository.findById(taskdto.getTypeId()).orElseThrow(() -> new IllegalArgumentException("Invalid Type ID")));
+      existingTask.setStatus(statusRepository.findById(taskdto.getStatusId()).orElseThrow(() -> new IllegalArgumentException("Invalid Status ID")));
+
       Task updatedTask = repository.save(existingTask);
       return mapper.fromTask(updatedTask);
     });
@@ -75,25 +85,36 @@ public class TaskServiceImpl implements TaskService {
   }
 
   @Override
-  public Optional<TaskDTO> changeStatus(Long id, String status) {
-    return repository.findById(id).map(existingTask -> {
-      existingTask.setStatus(String.valueOf(status));
-      Task updatedTask = repository.save(existingTask);
-      return mapper.fromTask(updatedTask);
-    });
+  public List<TaskType> getTaskTypes() {
+    return typeRepository.findAll();
   }
 
   @Override
-  public List<String> getTaskTypes() {
-    return Stream.of(TaskType.values())
-      .map(TaskType::getLabel)
-      .collect(Collectors.toList());
+  public List<TaskStatus> getTaskStatuses() {
+    return statusRepository.findAll();
   }
 
   @Override
-  public List<String> getTaskStatuses() {
-    return Stream.of(TaskStatus.values())
-      .map(TaskStatus::getLabel)
-      .collect(Collectors.toList());
+  public void addTaskType(TaskType taskType) {
+    if (taskType == null || taskType.getName().isBlank()) {
+      throw new IllegalArgumentException("Type name cannot be empty");
+    }
+
+    if (!typeRepository.existsByNameIgnoreCase(taskType.getName())) {
+      typeRepository.save(taskType);
+      log.info("Added new task type: {}", taskType.getName());
+    }
+  }
+
+  @Override
+  public void addTaskStatus(TaskStatus taskStatus) {
+    if (taskStatus == null || taskStatus.getName().isBlank()) {
+      throw new IllegalArgumentException("Status name cannot be empty");
+    }
+
+    if (!statusRepository.existsByNameIgnoreCase(taskStatus.getName())) {
+      statusRepository.save(taskStatus);
+      log.info("Added new task status: {}", taskStatus.getName());
+    }
   }
 }

@@ -20,8 +20,13 @@ public class Task {
   private String title;
   private String description;
 
-  private String type;
-  private String status;
+  @ManyToOne
+  @JoinColumn(name = "type_id")
+  private TaskType type;
+
+  @ManyToOne
+  @JoinColumn(name = "status_id")
+  private TaskStatus status;
 
   @Column(name = "created_on")
   private Date createdOn;

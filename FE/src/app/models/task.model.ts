@@ -2,7 +2,7 @@ export interface Task {
   id: number;
   title: string;
   description: string;
-  type: string;
-  status: string;
+  typeId: number;
+  statusId: number;
   createdOn: Date;
 }
