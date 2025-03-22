@@ -1,9 +1,9 @@
 package com.kanskaeliza.taskmanager.repository;
 
-import com.kanskaeliza.taskmanager.entity.dto.UserDTO;
+import com.kanskaeliza.taskmanager.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface UserRepository extends JpaRepository<UserDTO, Long> {
+public interface UserRepository extends JpaRepository<User, Long> {
 }

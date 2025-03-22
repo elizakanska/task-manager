@@ -1,7 +1,7 @@
 package com.kanskaeliza.taskmanager.service.impl;
 
-import com.kanskaeliza.taskmanager.entity.User;
 import com.kanskaeliza.taskmanager.entity.dto.UserDTO;
+import com.kanskaeliza.taskmanager.entity.User;
 import com.kanskaeliza.taskmanager.mapper.UserMapper;
 import com.kanskaeliza.taskmanager.repository.UserRepository;
 import com.kanskaeliza.taskmanager.service.UserService;
@@ -24,37 +24,37 @@ public class UserServiceImpl implements UserService {
   }
 
   @Override
-  public List<User> getAllUsers() {
-    List<UserDTO> userDTOs = repository.findAll();
-    return userDTOs.stream().map(mapper::toUser).collect(Collectors.toList());
+  public List<UserDTO> getAllUsers() {
+    List<User> users = repository.findAll();
+    return users.stream().map(mapper::toUser).collect(Collectors.toList());
   }
 
   @Override
-  public Optional<User> getUserById(Long id) {
+  public Optional<UserDTO> getUserById(Long id) {
     log.info("Looking for user with id {}.", id);
     return repository.findById(id).map(mapper::toUser);
   }
 
   @Override
-  public User saveUser(User user) {
+  public UserDTO saveUser(UserDTO user) {
     if (user == null || user.getUsername().isBlank() || user.getFirstName().isBlank() || user.getLastName().isBlank()) {
       throw new IllegalArgumentException("Invalid user data");
     }
 
-    UserDTO userDTO = mapper.toDto(user);
+    User userDTO = mapper.toDto(user);
     userDTO = repository.save(userDTO);
 
     return mapper.toUser(userDTO);
   }
 
   @Override
-  public Optional<User> editUserById(Long id, User user) {
+  public Optional<UserDTO> editUserById(Long id, UserDTO userDTO) {
     return repository.findById(id).map(existingUser -> {
-      existingUser.setUsername(user.getUsername());
-      existingUser.setPassword(user.getPassword());
-      existingUser.setFirstName(user.getFirstName());
-      existingUser.setLastName(user.getLastName());
-      UserDTO updatedUser = repository.save(existingUser);
+      existingUser.setUsername(userDTO.getUsername());
+      existingUser.setPassword(userDTO.getPassword());
+      existingUser.setFirstName(userDTO.getFirstName());
+      existingUser.setLastName(userDTO.getLastName());
+      User updatedUser = repository.save(existingUser);
       return mapper.toUser(updatedUser);
     });
   }

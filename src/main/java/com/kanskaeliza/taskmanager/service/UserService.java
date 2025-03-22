@@ -1,18 +1,18 @@
 package com.kanskaeliza.taskmanager.service;
 
-import com.kanskaeliza.taskmanager.entity.User;
+import com.kanskaeliza.taskmanager.entity.dto.UserDTO;
 
 import java.util.List;
 import java.util.Optional;
 
 public interface UserService {
-  List<User> getAllUsers();
+  List<UserDTO> getAllUsers();
 
-  Optional<User> getUserById(Long id);
+  Optional<UserDTO> getUserById(Long id);
 
-  User saveUser(User user);
+  UserDTO saveUser(UserDTO userDTO);
 
-  Optional<User> editUserById(Long id, User user);
+  Optional<UserDTO> editUserById(Long id, UserDTO userDTO);
 
   void deleteUserById(Long id);
 }
