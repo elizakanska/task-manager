@@ -1,5 +1,7 @@
 package com.kanskaeliza.taskmanager.service;
 
+import com.kanskaeliza.taskmanager.entity.TaskStatus;
+import com.kanskaeliza.taskmanager.entity.TaskType;
 import com.kanskaeliza.taskmanager.entity.dto.TaskDTO;
 
 import java.util.List;
@@ -16,9 +18,11 @@ public interface TaskService {
 
   void deleteTaskById(Long id);
 
-  Optional<TaskDTO> changeStatus(Long id, String status);
+  List<TaskType> getTaskTypes();
 
-  List<String> getTaskTypes();
+  List<TaskStatus> getTaskStatuses();
 
-  List<String> getTaskStatuses();
+  void addTaskType(TaskType taskType);
+
+  void addTaskStatus(TaskStatus taskStatus);
 }

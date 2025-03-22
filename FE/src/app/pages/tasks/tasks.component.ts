@@ -2,8 +2,10 @@ import { Component, OnDestroy, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { SharedModule } from '../../modules/shared/shared.module';
 import { TaskService } from '../../services/task.service';
-import { Subscription, switchMap } from 'rxjs';
+import { forkJoin, Subscription, switchMap } from 'rxjs';
 import { Task } from '../../models/task.model';
+import { Type } from '../../models/type.model';
+import { Status } from '../../models/status.model';
 
 @Component({
   selector: 'app-tasks',
@@ -21,8 +23,8 @@ export class TasksComponent implements OnInit, OnDestroy {
   searchQuery: string = '';
   selectedTask: Task | null = null;
   showTaskDetails = false;
-  typeOptions: string[] = [];
-  statusOptions: string[] = [];
+  typeOptions: Type[] = [];
+  statusOptions: Status[] = [];
   newType: string = '';
   newStatus: string = '';
   private subscriptions = new Subscription();
@@ -34,8 +36,8 @@ export class TasksComponent implements OnInit, OnDestroy {
     this.taskFormGroup = this.fb.group({
       title: ['', [Validators.required, Validators.minLength(3), Validators.maxLength(50)]],
       description: ['', [Validators.required, Validators.minLength(5), Validators.maxLength(200)]],
-      type: ['TASK', Validators.required],
-      status: ['PENDING', Validators.required],
+      typeId: [null, Validators.required],
+      statusId: [null, Validators.required],
       createdOn: [
         null,
         [
@@ -52,24 +54,18 @@ export class TasksComponent implements OnInit, OnDestroy {
 
   ngOnInit() {
     this.loadTaskTypesAndStatuses();
-    this.loadTasks();
   }
 
   loadTaskTypesAndStatuses() {
-    const typesSub = this.taskService.getTaskTypes().subscribe({
-      next: (data) => {
-        this.typeOptions = data;
-      },
-      error: (err) => console.error('Error loading task types:', err)
+    const loadSub = forkJoin([
+      this.taskService.getTaskTypes(),
+      this.taskService.getTaskStatuses()
+    ]).subscribe(([types, statuses]) => {
+      this.typeOptions = types;
+      this.statusOptions = statuses;
+      this.loadTasks();
     });
-    const statusesSub = this.taskService.getTaskStatuses().subscribe({
-      next: (data) => {
-        this.statusOptions = data;
-      },
-      error: (err) => console.error('Error loading task statuses:', err)
-    });
-    this.subscriptions.add(typesSub);
-    this.subscriptions.add(statusesSub);
+    this.subscriptions.add(loadSub);
   }
 
   loadTasks() {
@@ -88,35 +84,23 @@ export class TasksComponent implements OnInit, OnDestroy {
   }
 
   searchTasks() {
-    if (this.searchQuery.trim() === '') {
-      this.filteredTasks = [...this.tasks];
-    } else {
-      this.filteredTasks = this.tasks.filter(task =>
+    this.filteredTasks = this.searchQuery.trim()
+      ? this.tasks.filter(task =>
         task.title.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
         task.description.toLowerCase().includes(this.searchQuery.toLowerCase())
-      );
-    }
+      )
+      : [...this.tasks];
   }
 
   openTaskForm(task: Task | null = null) {
     this.editingTask = task;
-    if (task) {
-      this.taskFormGroup?.setValue({
-        title: task.title,
-        description: task.description,
-        type: task.type,
-        status: task.status,
-        createdOn: task.createdOn
-      });
-    } else {
-      this.taskFormGroup?.reset({
-        title: '',
-        description: '',
-        type: 'TASK',
-        status: 'PENDING',
-        createdOn: null
-      });
-    }
+    this.taskFormGroup.setValue({
+      title: task?.title || '',
+      description: task?.description || '',
+      typeId: task?.typeId || null,
+      statusId: task?.statusId || null,
+      createdOn: task?.createdOn || null
+    });
     this.showTaskForm = true;
   }
 
@@ -126,18 +110,13 @@ export class TasksComponent implements OnInit, OnDestroy {
   }
 
   saveTask() {
-    if (this.taskFormGroup.invalid) {
-      Object.keys(this.taskFormGroup.controls).forEach(key => {
-        const control = this.taskFormGroup.get(key);
-        if (control && control.invalid) {
-          control.markAsTouched();
-        }
-      });
-      return;
-    }
-    const taskData: Task = {
+    if (this.taskFormGroup.invalid) return;
+
+    const taskData = {
       ...this.taskFormGroup.value,
-      createdOn: new Date()
+      createdOn: new Date(this.taskFormGroup.get('createdOn')?.value),
+      typeId: this.taskFormGroup.get('typeId')?.value,
+      statusId: this.taskFormGroup.get('statusId')?.value
     };
 
     const saveSub = (this.editingTask
@@ -162,8 +141,7 @@ export class TasksComponent implements OnInit, OnDestroy {
   }
 
   deleteTask(id: number) {
-    const confirmed = window.confirm("Are you sure you want to delete this task?");
-    if (confirmed) {
+    if (confirm('Are you sure you want to delete this task?')) {
       const deleteSub = this.taskService.deleteTask(id).pipe(
         switchMap(() => this.taskService.getTasks())
       ).subscribe({
@@ -173,50 +151,54 @@ export class TasksComponent implements OnInit, OnDestroy {
         },
         error: (err) => console.error('Error deleting task:', err)
       });
-
       this.subscriptions.add(deleteSub);
     }
   }
 
-  viewTaskDetails(taskId: number) {
-    const detailsSub = this.taskService.getTaskById(taskId).subscribe({
-      next: (task: Task) => {
-        this.selectedTask = task;
-        this.showTaskDetails = true;
-      },
-      error: (err) => console.error('Error loading task details:', err)
-    });
-
-    this.subscriptions.add(detailsSub);
+  viewTaskDetails(id: number) {
+    this.selectedTask = this.tasks.find(t => t.id === id) || null;
+    this.showTaskDetails = !!this.selectedTask;
   }
 
   closeTaskDetails() {
-    this.showTaskDetails = false;
     this.selectedTask = null;
+    this.showTaskDetails = false;
   }
 
-  onSearchType(value: string): void {
-    this.newType = value;
-  }
-
-  onSearchStatus(value: string): void {
-    this.newStatus = value;
-  }
-
-  addNewType(): void {
-    if (this.newType && !this.typeOptions.includes(this.newType)) {
-      this.typeOptions.push(this.newType);
-      this.taskFormGroup.get('type')?.setValue(this.newType);
-      this.newType = '';
+  addNewType() {
+    if (this.newType.trim()) {
+      const newTypeName = this.newType.trim();
+      const addTypeSub = this.taskService.addNewType(newTypeName).subscribe({
+        next: () => {
+          this.loadTaskTypesAndStatuses();
+          this.newType = '';
+        },
+        error: (err) => console.error('Error adding new type:', err)
+      });
+      this.subscriptions.add(addTypeSub);
     }
   }
 
-  addNewStatus(): void {
-    if (this.newStatus && !this.statusOptions.includes(this.newStatus)) {
-      this.statusOptions.push(this.newStatus);
-      this.taskFormGroup.get('status')?.setValue(this.newStatus);
-      this.newStatus = '';
+  addNewStatus() {
+    if (this.newStatus.trim()) {
+      const newStatusName = this.newStatus.trim();
+      const addStatusSub = this.taskService.addNewStatus(newStatusName).subscribe({
+        next: () => {
+          this.loadTaskTypesAndStatuses();
+          this.newStatus = '';
+        },
+        error: (err) => console.error('Error adding new status:', err)
+      });
+      this.subscriptions.add(addStatusSub);
     }
+  }
+
+  getStatusName(statusId: number): string {
+    return this.statusOptions.find(option => option.id === statusId)?.name || 'Unknown';
+  }
+
+  getTypeName(typeId: number): string {
+    return this.typeOptions.find(option => option.id === typeId)?.name || 'Unknown';
   }
 
   ngOnDestroy() {

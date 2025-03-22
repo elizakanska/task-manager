@@ -23,42 +23,54 @@ export class TaskService {
 
   getTasks(): Observable<Task[]> {
     return this.http.get<Task[]>(`${API_URL}/tasks`).pipe(
-      catchError(this.handleError)
+        catchError(this.handleError)
     );
   }
 
   getTaskById(id: number): Observable<Task> {
     return this.http.get<Task>(`${API_URL}/tasks/${id}`).pipe(
-      catchError(this.handleError)
+        catchError(this.handleError)
     );
   }
 
   addTask(task: Task): Observable<Task> {
     return this.http.post<Task>(`${API_URL}/tasks`, task).pipe(
-      catchError(this.handleError)
+        catchError(this.handleError)
     );
   }
 
   editTask(id: number, task: Task): Observable<Task> {
     return this.http.put<Task>(`${API_URL}/tasks/${id}`, task).pipe(
-      catchError(this.handleError)
+        catchError(this.handleError)
     );
   }
 
   deleteTask(id: number): Observable<void> {
     return this.http.delete<void>(`${API_URL}/tasks/${id}`).pipe(
+        catchError(this.handleError)
+    );
+  }
+
+  getTaskTypes(): Observable<{ id: number, name: string }[]> {
+    return this.http.get<{ id: number, name: string }[]>(`${API_URL}/task-types`).pipe(
       catchError(this.handleError)
     );
   }
 
-  getTaskTypes(): Observable<string[]> {
-    return this.http.get<string[]>(`${API_URL}/task-types`).pipe(
+  getTaskStatuses(): Observable<{ id: number, name: string }[]> {
+    return this.http.get<{ id: number, name: string }[]>(`${API_URL}/task-statuses`).pipe(
       catchError(this.handleError)
     );
   }
 
-  getTaskStatuses(): Observable<string[]> {
-    return this.http.get<string[]>(`${API_URL}/task-statuses`).pipe(
+  addNewType(newType: string): Observable<void> {
+    return this.http.post<void>(`${API_URL}/task-types`, { name: newType }).pipe(
+      catchError(this.handleError)
+    );
+  }
+
+  addNewStatus(newStatus: string): Observable<void> {
+    return this.http.post<void>(`${API_URL}/task-statuses`, { name: newStatus }).pipe(
       catchError(this.handleError)
     );
   }
