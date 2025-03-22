@@ -15,5 +15,6 @@ public class TaskDTO {
   private String description;
   private Long typeId;
   private Long statusId;
+  private Long assignedTo;
   private Date createdOn;
 }
