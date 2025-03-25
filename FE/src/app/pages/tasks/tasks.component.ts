@@ -97,17 +97,14 @@ export class TasksComponent implements OnInit, OnDestroy {
       return;
     }
 
-    const taskData = {
-      ...this.taskFormGroup.value,
-      createdOn: new Date(this.taskFormGroup.get('createdOn')!.value),
-      typeId: this.taskFormGroup.get('typeId')!.value,
-      statusId: this.taskFormGroup.get('statusId')!.value
-    };
+    const { createdOn, typeId, statusId, ...taskData } = this.taskFormGroup.value;
+    const taskPayload = { ...taskData, createdOn: new Date(createdOn), typeId, statusId };
 
-    const saveSub = (this.editingTask
-        ? this.taskService.editTask(this.editingTask.id, taskData)
-        : this.taskService.addTask(taskData)
-    ).pipe(
+    const taskOperation$ = this.editingTask
+      ? this.taskService.editTask(this.editingTask.id, taskPayload)
+      : this.taskService.addTask(taskPayload);
+
+    const saveSub = taskOperation$.pipe(
       switchMap(() => this.taskService.getTasks())
     ).subscribe({
       next: (data) => {
