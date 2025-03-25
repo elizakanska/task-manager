@@ -1,18 +1,35 @@
 import { ChangeDetectionStrategy, Component, OnDestroy, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { SharedModule } from '../../modules/shared/shared.module';
+import {FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators} from '@angular/forms';
 import { TaskService } from '../../services/task.service';
 import { forkJoin, Subscription, switchMap } from 'rxjs';
 import { Task } from '../../models/task.model';
 import { Type } from '../../models/type.model';
 import { Status } from '../../models/status.model';
+import { NzButtonModule } from 'ng-zorro-antd/button';
+import { NzIconModule } from 'ng-zorro-antd/icon';
+import { NzInputModule } from 'ng-zorro-antd/input';
+import { NzSelectModule } from 'ng-zorro-antd/select';
+import { NzDatePickerModule } from 'ng-zorro-antd/date-picker';
+import { NzFormModule } from 'ng-zorro-antd/form';
+import {DatePipe, NgClass} from '@angular/common';
 
 @Component({
   selector: 'app-tasks',
   templateUrl: './tasks.component.html',
   styleUrls: ['./tasks.component.scss'],
   standalone: true,
-  imports: [SharedModule],
+  imports: [
+    NzButtonModule,
+    NzIconModule,
+    NzInputModule,
+    NzSelectModule,
+    NzDatePickerModule,
+    NzFormModule,
+    DatePipe,
+    ReactiveFormsModule,
+    NgClass,
+    FormsModule
+  ],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class TasksComponent implements OnInit, OnDestroy {

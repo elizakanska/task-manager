@@ -1,16 +1,30 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { SharedModule } from '../../modules/shared/shared.module';
+import {FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators} from '@angular/forms';
 import { UserService } from '../../services/user.service';
 import { Subscription, switchMap } from 'rxjs';
 import { User } from '../../models/user.model';
+import {NzIconDirective} from 'ng-zorro-antd/icon';
+import {NgClass} from '@angular/common';
+import {NzFormControlComponent, NzFormDirective, NzFormItemComponent} from 'ng-zorro-antd/form';
+import {NzInputDirective} from 'ng-zorro-antd/input';
+import {NzButtonComponent} from 'ng-zorro-antd/button';
 
 @Component({
   selector: 'app-users',
   templateUrl: './users.component.html',
   styleUrls: ['./users.component.scss'],
   standalone: true,
-  imports: [SharedModule]
+  imports: [
+    FormsModule,
+    NzIconDirective,
+    NgClass,
+    ReactiveFormsModule,
+    NzFormDirective,
+    NzFormControlComponent,
+    NzFormItemComponent,
+    NzInputDirective,
+    NzButtonComponent
+  ]
 })
 export class UsersComponent implements OnInit, OnDestroy {
   users: User[] = [];
