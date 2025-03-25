@@ -47,27 +47,32 @@ public class TaskServiceImpl implements TaskService {
   }
 
   @Override
-  public TaskDTO saveTask(TaskDTO taskdto) {
-    if (taskdto == null || taskdto.getTitle().isBlank() || taskdto.getDescription().isBlank() || taskdto.getCreatedOn() == null) {
-      throw new IllegalArgumentException("Invalid task data");
-    }
+  public TaskDTO saveTask(TaskDTO dto) {
+    validateTask(dto);
 
-    Task task = mapper.fromDto(taskdto);
-    task.setType(typeRepository.findById(taskdto.getTypeId()).orElseThrow(() -> new IllegalArgumentException("Invalid Type ID")));
-    task.setStatus(statusRepository.findById(taskdto.getStatusId()).orElseThrow(() -> new IllegalArgumentException("Invalid Status ID")));
+    Task task = mapper.fromDto(dto);
+    task.setType(typeRepository.findById(dto.getTypeId()).orElseThrow(() -> new IllegalArgumentException("Invalid Type ID")));
+    task.setStatus(statusRepository.findById(dto.getStatusId()).orElseThrow(() -> new IllegalArgumentException("Invalid Status ID")));
 
     task = repository.save(task);
     return mapper.fromTask(task);
   }
 
+  private void validateTask(TaskDTO dto) {
+    if (dto == null || dto.getTitle().isBlank() || dto.getDescription().isBlank() || dto.getCreatedOn() == null) {
+      throw new IllegalArgumentException("Invalid task data");
+    }
+  }
+
+
   @Override
-  public Optional<TaskDTO> editTaskById(Long id, TaskDTO taskdto) {
+  public Optional<TaskDTO> editTaskById(Long id, TaskDTO dto) {
     return repository.findById(id).map(existingTask -> {
-      existingTask.setTitle(taskdto.getTitle());
-      existingTask.setDescription(taskdto.getDescription());
-      existingTask.setCreatedOn(taskdto.getCreatedOn());
-      existingTask.setType(typeRepository.findById(taskdto.getTypeId()).orElseThrow(() -> new IllegalArgumentException("Invalid Type ID")));
-      existingTask.setStatus(statusRepository.findById(taskdto.getStatusId()).orElseThrow(() -> new IllegalArgumentException("Invalid Status ID")));
+      existingTask.setTitle(dto.getTitle());
+      existingTask.setDescription(dto.getDescription());
+      existingTask.setCreatedOn(dto.getCreatedOn());
+      existingTask.setType(typeRepository.findById(dto.getTypeId()).orElseThrow(() -> new IllegalArgumentException("Invalid Type ID")));
+      existingTask.setStatus(statusRepository.findById(dto.getStatusId()).orElseThrow(() -> new IllegalArgumentException("Invalid Status ID")));
 
       Task updatedTask = repository.save(existingTask);
       return mapper.fromTask(updatedTask);
