@@ -78,10 +78,6 @@ export class TasksComponent implements OnInit, OnDestroy {
     this.subscriptions.add(loadSub);
   }
 
-  trackByTaskId(index: number, task: Task): number {
-    return task.id;
-  }
-
   searchTasks() {
     this.filteredTasks = this.searchQuery.trim()
       ? this.tasks.filter(task =>

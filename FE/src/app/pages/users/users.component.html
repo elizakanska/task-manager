@@ -22,21 +22,23 @@
     </tr>
     </thead>
     <tbody>
-    <tr *ngFor="let user of filteredUsers; trackBy: trackByUserId">
-      <td><a (click)="viewUserDetails(user.id)">{{ user.username }}</a></td>
-      <td>{{ user.firstName }} {{ user.lastName }}</td>
-      <td>
-        <button (click)="editUser(user)" class="btn btn-warning">
-          <span nz-icon nzType="edit"></span>
-          <span> Edit</span>
-        </button>
+      @for (user of users; track user.id) {
+        <tr>
+          <td><a (click)="viewUserDetails(user.id)">{{ user.username }}</a></td>
+          <td>{{ user.firstName }} {{ user.lastName }}</td>
+          <td>
+            <button (click)="editUser(user)" class="btn btn-warning">
+              <span nz-icon nzType="edit"></span>
+              <span> Edit</span>
+            </button>
 
-        <button (click)="deleteUser(user.id)" class="btn btn-danger">
-          <span nz-icon nzType="delete"></span>
-          <span> Delete</span>
-        </button>
-      </td>
-    </tr>
+            <button (click)="deleteUser(user.id)" class="btn btn-danger">
+              <span nz-icon nzType="delete"></span>
+              <span> Delete</span>
+            </button>
+          </td>
+        </tr>
+      }
     </tbody>
   </table>
 
@@ -46,41 +48,10 @@
 
         <h3>{{ editingUser ? 'User Details' : 'Add User' }}</h3>
 
-        <nz-form-item>
-          <nz-form-control
-            [nzValidateStatus]="userFormGroup.get('username')?.invalid && userFormGroup.get('username')?.touched ? 'error' : ''"
-            nzHasFeedback
-            nzErrorTip="Username is required!">
-            <input nz-input placeholder="Username" formControlName="username"/>
-          </nz-form-control>
-        </nz-form-item>
-
-        <nz-form-item>
-          <nz-form-control
-            [nzValidateStatus]="userFormGroup.get('password')?.invalid && userFormGroup.get('password')?.touched ? 'error' : ''"
-            nzHasFeedback
-            nzErrorTip="Password is required!">
-            <input nz-input type="password" placeholder="Password" formControlName="password"/>
-          </nz-form-control>
-        </nz-form-item>
-
-        <nz-form-item>
-          <nz-form-control
-            [nzValidateStatus]="userFormGroup.get('firstName')?.invalid && userFormGroup.get('firstName')?.touched ? 'error' : ''"
-            nzHasFeedback
-            nzErrorTip="First name is required!">
-            <input nz-input placeholder="First Name" formControlName="firstName"/>
-          </nz-form-control>
-        </nz-form-item>
-
-        <nz-form-item>
-          <nz-form-control
-            [nzValidateStatus]="userFormGroup.get('lastName')?.invalid && userFormGroup.get('lastName')?.touched ? 'error' : ''"
-            nzHasFeedback
-            nzErrorTip="Last name is required!">
-            <input nz-input placeholder="Last Name" formControlName="lastName"/>
-          </nz-form-control>
-        </nz-form-item>
+        <app-form-control label="Username" formControlName="username" errorMessage="Username is required!"></app-form-control>
+        <app-form-control label="Password" type="password" formControlName="password" errorMessage="Password is required!"></app-form-control>
+        <app-form-control label="First Name" formControlName="firstName" errorMessage="First name is required!"></app-form-control>
+        <app-form-control label="Last Name" formControlName="lastName" errorMessage="Last name is required!"></app-form-control>
 
         <button nz-button class="login-form-button login-form-margin" [nzType]="'primary'">
           {{ editingUser ? 'Update' : 'Create' }}

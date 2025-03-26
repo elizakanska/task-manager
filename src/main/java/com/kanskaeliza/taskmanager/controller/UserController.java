@@ -15,8 +15,9 @@ public class UserController {
   private final UserService service;
 
   @GetMapping("/users")
-  public ResponseEntity<List<UserDTO>> getAllUsers() {
-    return ResponseEntity.ok(service.getAllUsers());
+  public ResponseEntity<List<UserDTO>> getAllUsers(@RequestParam(required = false) String searchQuery) {
+    List<UserDTO> users = service.getAllUsers(searchQuery);
+    return ResponseEntity.ok(users);
   }
 
   @GetMapping("/users/{id}")

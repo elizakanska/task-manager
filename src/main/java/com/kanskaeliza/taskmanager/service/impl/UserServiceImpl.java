@@ -25,10 +25,17 @@ public class UserServiceImpl implements UserService {
   }
 
   @Override
-  public List<UserDTO> getAllUsers() {
-    List<User> users = repository.findAll();
+  public List<UserDTO> getAllUsers(String searchQuery) {
+    List<User> users;
+    if (searchQuery != null && !searchQuery.isEmpty()) {
+      users = repository.findByUsernameContainingIgnoreCaseOrFirstNameContainingIgnoreCaseOrLastNameContainingIgnoreCase(
+        searchQuery, searchQuery, searchQuery);
+    } else {
+      users = repository.findAll();
+    }
     return users.stream().map(mapper::toUser).collect(Collectors.toList());
   }
+
 
   @Override
   public Optional<UserDTO> getUserById(Long id) {

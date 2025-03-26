@@ -23,22 +23,24 @@
     </tr>
     </thead>
     <tbody>
-    <tr *ngFor="let task of filteredTasks; trackBy: trackByTaskId">
-      <td><a (click)="viewTaskDetails(task.id)">{{ task.title }}</a></td>
-      <td>{{ getStatusName(task.statusId) }}</td>
-      <td>{{ getTypeName(task.typeId) }}</td>
-      <td>
-        <button (click)="editTask(task)" class="btn btn-warning">
-          <span nz-icon nzType="edit"></span>
-          <span> Edit</span>
-        </button>
+      @for (task of filteredTasks; track task.id) {
+        <tr>
+          <td><a (click)="viewTaskDetails(task.id)">{{ task.title }}</a></td>
+          <td>{{ getStatusName(task.statusId) }}</td>
+          <td>{{ getTypeName(task.typeId) }}</td>
+          <td>
+            <button (click)="editTask(task)" class="btn btn-warning">
+              <span nz-icon nzType="edit"></span>
+              <span> Edit</span>
+            </button>
 
-        <button (click)="deleteTask(task.id)" class="btn btn-danger">
-          <span nz-icon nzType="delete"></span>
-          <span> Delete</span>
-        </button>
-      </td>
-    </tr>
+            <button (click)="deleteTask(task.id)" class="btn btn-danger">
+              <span nz-icon nzType="delete"></span>
+              <span> Delete</span>
+            </button>
+          </td>
+        </tr>
+      }
     </tbody>
   </table>
 
@@ -47,66 +49,39 @@
       <form nz-form [formGroup]="taskFormGroup" (ngSubmit)="saveTask()">
         <h3>{{ editingTask ? 'Task Details' : 'Add Task' }}</h3>
 
-        <nz-form-item>
-          <nz-form-control
-            [nzValidateStatus]="taskFormGroup.get('title')?.invalid && taskFormGroup.get('title')?.touched ? 'error' : ''"
-            nzHasFeedback
-            nzErrorTip="Invalid title! Title must be 3-50 characters!">
-            <input nz-input placeholder="Title" formControlName="title"/>
-          </nz-form-control>
-        </nz-form-item>
+        <app-form-control label="Title" formControlName="title" errorMessage="Invalid title! Title must be 3-50 characters!"></app-form-control>
+        <app-form-control label="Description" formControlName="description" errorMessage="Invalid description! Description must be 5-200 characters!"></app-form-control>
+        <app-form-control label="Type" formControlName="typeId" errorMessage="Please select or enter a type!">
+          <nz-select formControlName="typeId" nzPlaceHolder="Select Type" [nzDropdownRender]="typeTemplate">
+            @for (option of statusOptions; track option.id) {
+              <nz-option [nzValue]="option.id" [nzLabel]="option.name"></nz-option>
+            }
+          </nz-select>
+          <ng-template #typeTemplate>
+            <input nz-input [(ngModel)]="newType" placeholder="Add new type" [ngModelOptions]="{standalone: true}"/>
+            <button nz-button nzType="link" (click)="addNewType()">
+              + Add "{{ newType }}"
+            </button>
+          </ng-template>
+        </app-form-control>
 
-        <nz-form-item>
-          <nz-form-control
-            [nzValidateStatus]="taskFormGroup.get('description')?.invalid && taskFormGroup.get('description')?.touched ? 'error' : ''"
-            nzHasFeedback
-            nzErrorTip="Invalid description! Description must be 5-200 characters!">
-            <input nz-input placeholder="Description" formControlName="description"/>
-          </nz-form-control>
-        </nz-form-item>
+        <app-form-control label="Status" formControlName="statusId" errorMessage="Please select or enter a status!">
+          <nz-select formControlName="statusId" nzPlaceHolder="Select Status" [nzDropdownRender]="statusTemplate">
+            @for (option of statusOptions; track option.id) {
+              <nz-option [nzValue]="option.id" [nzLabel]="option.name"></nz-option>
+            }
+          </nz-select>
+          <ng-template #statusTemplate>
+            <input nz-input [(ngModel)]="newStatus" placeholder="Add new status" [ngModelOptions]="{standalone: true}"/>
+            <button nz-button nzType="link" (click)="addNewStatus()">
+              + Add "{{ newStatus }}"
+            </button>
+          </ng-template>
+        </app-form-control>
 
-        <nz-form-item>
-          <nz-form-control
-            [nzValidateStatus]="taskFormGroup.get('typeId')?.invalid && taskFormGroup.get('typeId')?.touched ? 'error' : ''"
-            nzHasFeedback
-            nzErrorTip="Please select or enter a type!">
-            <nz-select formControlName="typeId" nzPlaceHolder="Select Type" [nzDropdownRender]="typeTemplate">
-              <nz-option *ngFor="let option of typeOptions" [nzValue]="option.id" [nzLabel]="option.name"></nz-option>
-            </nz-select>
-            <ng-template #typeTemplate>
-              <input nz-input [(ngModel)]="newType" placeholder="Add new type" [ngModelOptions]="{standalone: true}"/>
-              <button nz-button nzType="link" (click)="addNewType()">
-                + Add "{{ newType }}"
-              </button>
-            </ng-template>
-          </nz-form-control>
-        </nz-form-item>
-
-        <nz-form-item>
-          <nz-form-control
-            [nzValidateStatus]="taskFormGroup.get('statusId')?.invalid && taskFormGroup.get('statusId')?.touched ? 'error' : ''"
-            nzHasFeedback
-            nzErrorTip="Please select or enter a status!">
-            <nz-select formControlName="statusId" nzPlaceHolder="Select Status" [nzDropdownRender]="statusTemplate">
-              <nz-option *ngFor="let option of statusOptions" [nzValue]="option.id" [nzLabel]="option.name"></nz-option>
-            </nz-select>
-            <ng-template #statusTemplate>
-              <input nz-input [(ngModel)]="newStatus" placeholder="Add new status" [ngModelOptions]="{standalone: true}"/>
-              <button nz-button nzType="link" (click)="addNewStatus()">
-                + Add "{{ newStatus }}"
-              </button>
-            </ng-template>
-          </nz-form-control>
-        </nz-form-item>
-
-        <nz-form-item>
-          <nz-form-control
-            [nzValidateStatus]="taskFormGroup.get('createdOn')?.invalid && taskFormGroup.get('createdOn')?.touched ? 'error' : ''"
-            nzHasFeedback
-            [nzErrorTip]="taskFormGroup.get('createdOn')?.hasError('required') ? 'Date is required!' : ''">
-            <nz-date-picker nz-input nzFormat="dd-MMM-yyyy" formControlName="createdOn"></nz-date-picker>
-          </nz-form-control>
-        </nz-form-item>
+        <app-form-control label="Created On" formControlName="createdOn" errorMessage="Date is required!">
+          <nz-date-picker nz-input nzFormat="dd-MMM-yyyy" formControlName="createdOn"></nz-date-picker>
+        </app-form-control>
 
         <button nz-button class="login-form-button login-form-margin" [nzType]="'primary'">
           {{ editingTask ? 'Update' : 'Create' }}
