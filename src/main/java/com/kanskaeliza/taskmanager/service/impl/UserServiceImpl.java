@@ -6,6 +6,7 @@ import com.kanskaeliza.taskmanager.mapper.UserMapper;
 import com.kanskaeliza.taskmanager.repository.UserRepository;
 import com.kanskaeliza.taskmanager.service.UserService;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -18,7 +19,7 @@ public class UserServiceImpl implements UserService {
   private final UserRepository repository;
   private final UserMapper mapper;
 
-  public UserServiceImpl(UserRepository repository, UserMapper mapper) {
+  public UserServiceImpl(UserRepository repository, @Qualifier("userMapperImpl") UserMapper mapper) {
     this.repository = repository;
     this.mapper = mapper;
   }
