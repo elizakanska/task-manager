@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, OnDestroy, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { UserService } from '../../services/user.service';
-import { Subscription } from 'rxjs';
+import {Subscription, switchMap} from 'rxjs';
 import { User } from '../../models/user.model';
 import { NzButtonModule } from 'ng-zorro-antd/button';
 import { NzIconModule } from 'ng-zorro-antd/icon';
@@ -27,10 +27,11 @@ import { NgClass } from '@angular/common';
 })
 export class UsersComponent implements OnInit, OnDestroy {
   users: User[] = [];
+  filteredUsers: User[] = [];
   showUserForm = false;
   editingUser: User | null = null;
   userFormGroup: FormGroup;
-  searchQuery = '';
+  searchQuery: string = '';
   selectedUser: User | null = null;
   showUserDetails = false;
   private subscriptions = new Subscription();
@@ -83,28 +84,22 @@ export class UsersComponent implements OnInit, OnDestroy {
 
   saveUser() {
     if (this.userFormGroup.invalid) {
-      this.userFormGroup.markAllAsTouched();
+      alert('Please fill in all required fields.');
       return;
     }
 
-    const userData: User = {
-      ...this.userFormGroup.value,
-      ...(this.editingUser && { id: this.editingUser.id })
-    };
+    const userPayload = { ...this.userFormGroup.value };
 
-    const saveSub = (this.editingUser
-        ? this.userService.editUser(this.editingUser.id, userData)
-        : this.userService.addUser(userData)
+    const userOperation$ = this.editingUser
+      ? this.userService.editUser(this.editingUser.id, userPayload)
+      : this.userService.addUser(userPayload);
+
+    const saveSub = userOperation$.pipe(
+      switchMap(() => this.userService.getUsers())
     ).subscribe({
-      next: (savedUser) => {
-        if (this.editingUser) {
-          const index = this.users.findIndex(user => user.id === savedUser.id);
-          if (index !== -1) {
-            this.users[index] = savedUser;
-          }
-        } else {
-          this.users.push(savedUser);
-        }
+      next: (data) => {
+        this.users = data;
+        this.filteredUsers = [...this.users];
         this.closeUserForm();
       },
       error: (err) => console.error('Error saving user:', err)
@@ -119,13 +114,15 @@ export class UsersComponent implements OnInit, OnDestroy {
 
   deleteUser(id: number) {
     if (confirm('Are you sure you want to delete this user?')) {
-      const deleteSub = this.userService.deleteUser(id).subscribe({
-        next: () => {
-          this.users = this.users.filter(user => user.id !== id);
+      const deleteSub = this.userService.deleteUser(id).pipe(
+        switchMap(() => this.userService.getUsers())
+      ).subscribe({
+        next: (data) => {
+          this.users = data;
+          this.filteredUsers = [...this.users];
         },
         error: (err) => console.error('Error deleting user:', err)
       });
-
       this.subscriptions.add(deleteSub);
     }
   }
