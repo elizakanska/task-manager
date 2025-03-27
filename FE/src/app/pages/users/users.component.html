@@ -53,9 +53,14 @@
         <app-form-control label="First Name" formControlName="firstName" errorMessage="First name is required!"></app-form-control>
         <app-form-control label="Last Name" formControlName="lastName" errorMessage="Last name is required!"></app-form-control>
 
-        <button nz-button class="login-form-button login-form-margin" [nzType]="'primary'">
+        <button
+          nz-button
+          class="login-form-button login-form-margin"
+          [nzType]="'primary'"
+          [disabled]="userFormGroup.invalid">
           {{ editingUser ? 'Update' : 'Create' }}
         </button>
+
 
         <button
           nz-button
