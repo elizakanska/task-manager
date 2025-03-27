@@ -1,0 +1,85 @@
+<div class="container">
+  <h2>User Manager</h2>
+
+  <input
+    type="text"
+    [(ngModel)]="searchQuery"
+    placeholder="Search by name"
+    class="search-bar"
+    (input)="searchUsers()"/>
+
+  <button (click)="openUserForm()" class="btn btn-primary">
+    <span nz-icon nzType="plus-circle"></span>
+    <span> Add New User</span>
+  </button>
+
+  <table class="table">
+    <thead>
+    <tr>
+      <th>Username</th>
+      <th>Full Name</th>
+      <th>Action</th>
+    </tr>
+    </thead>
+    <tbody>
+      @for (user of users; track user.id) {
+        <tr>
+          <td><a (click)="viewUserDetails(user.id)">{{ user.username }}</a></td>
+          <td>{{ user.firstName }} {{ user.lastName }}</td>
+          <td>
+            <button (click)="editUser(user)" class="btn btn-warning">
+              <span nz-icon nzType="edit"></span>
+              <span> Edit</span>
+            </button>
+
+            <button (click)="deleteUser(user.id)" class="btn btn-danger">
+              <span nz-icon nzType="delete"></span>
+              <span> Delete</span>
+            </button>
+          </td>
+        </tr>
+      }
+    </tbody>
+  </table>
+
+  <div class="modal" [ngClass]="{ 'is-visible': showUserForm }">
+    <div class="modal-content custom-form">
+      <form nz-form [formGroup]="userFormGroup" (ngSubmit)="saveUser()">
+
+        <h3>{{ editingUser ? 'User Details' : 'Add User' }}</h3>
+
+        <app-form-control label="Username" formControlName="username" errorMessage="Username is required!"></app-form-control>
+        <app-form-control label="Password" type="password" formControlName="password" errorMessage="Password is required!"></app-form-control>
+        <app-form-control label="First Name" formControlName="firstName" errorMessage="First name is required!"></app-form-control>
+        <app-form-control label="Last Name" formControlName="lastName" errorMessage="Last name is required!"></app-form-control>
+
+        <button
+          nz-button
+          class="login-form-button login-form-margin"
+          [nzType]="'primary'"
+          [disabled]="userFormGroup.invalid">
+          {{ editingUser ? 'Update' : 'Create' }}
+        </button>
+
+
+        <button
+          nz-button
+          class="login-form-button login-form-margin"
+          (click)="closeUserForm(); $event.preventDefault()"
+          nzType="default">
+          Cancel
+        </button>
+
+      </form>
+    </div>
+  </div>
+
+  <div class="modal" [ngClass]="{ 'is-visible': showUserDetails }">
+    <div class="modal-content custom-form">
+      <h3>User Details</h3>
+      <p><strong>Username:</strong> {{ selectedUser?.username }}</p>
+      <p><strong>Full Name:</strong> {{ selectedUser?.firstName }} {{ selectedUser?.lastName }}</p>
+      <button nz-button nzType="default" (click)="closeUserDetails()">Close</button>
+    </div>
+  </div>
+</div>
