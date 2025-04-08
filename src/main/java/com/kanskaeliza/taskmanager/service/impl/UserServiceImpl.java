@@ -5,16 +5,16 @@ import com.kanskaeliza.taskmanager.entity.User;
 import com.kanskaeliza.taskmanager.mapper.UserMapper;
 import com.kanskaeliza.taskmanager.repository.UserRepository;
 import com.kanskaeliza.taskmanager.service.UserService;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
-@Slf4j
 @Service
+@Slf4j
 public class UserServiceImpl implements UserService {
   private final UserRepository repository;
   private final UserMapper mapper;
@@ -26,54 +26,53 @@ public class UserServiceImpl implements UserService {
 
   @Override
   public List<UserDTO> getAllUsers(String searchQuery) {
-    List<User> users;
-    if (searchQuery != null && !searchQuery.isEmpty()) {
-      users = repository.findByUsernameContainingIgnoreCaseOrFirstNameContainingIgnoreCaseOrLastNameContainingIgnoreCase(
-        searchQuery, searchQuery, searchQuery);
-    } else {
-      users = repository.findAll();
-    }
-    return users.stream().map(mapper::toUser).collect(Collectors.toList());
+    List<User> users = searchQuery != null && !searchQuery.isEmpty()
+      ? repository.findByUsernameContainingIgnoreCaseOrFirstNameContainingIgnoreCaseOrLastNameContainingIgnoreCase(
+      searchQuery, searchQuery, searchQuery)
+      : repository.findAll();
+    return users.stream().map(mapper::toUser).toList();
   }
-
 
   @Override
   public Optional<UserDTO> getUserById(Long id) {
-    log.info("Looking for user with id {}.", id);
     return repository.findById(id).map(mapper::toUser);
   }
 
   @Override
-  public UserDTO saveUser(UserDTO user) {
-    if (user == null || user.getUsername().isBlank() || user.getFirstName().isBlank() || user.getLastName().isBlank()) {
-      throw new IllegalArgumentException("Invalid user data");
+  public UserDTO createUser(UserDTO userDTO) {
+    validateUserDTO(userDTO);
+    User newUser = mapper.toDto(userDTO);
+    return mapper.toUser(repository.save(newUser));
+  }
+
+  @Override
+  public UserDTO updateUser(Long id, UserDTO userDTO) {
+    validateUserDTO(userDTO);
+    User existingUser = repository.findById(id)
+      .orElseThrow(() -> new EntityNotFoundException("User not found with id: " + id));
+
+    existingUser.setUsername(userDTO.getUsername());
+    existingUser.setPassword(userDTO.getPassword());
+    existingUser.setFirstName(userDTO.getFirstName());
+    existingUser.setLastName(userDTO.getLastName());
+
+    return mapper.toUser(repository.save(existingUser));
+  }
+
+  @Override
+  public void deleteUser(Long id) {
+    if (!repository.existsById(id)) {
+      throw new EntityNotFoundException("User not found with id: " + id);
     }
-
-    User userDTO = mapper.toDto(user);
-    userDTO = repository.save(userDTO);
-
-    return mapper.toUser(userDTO);
+    repository.deleteById(id);
   }
 
-  @Override
-  public Optional<UserDTO> editUserById(Long id, UserDTO userDTO) {
-    return repository.findById(id).map(existingUser -> {
-      existingUser.setUsername(userDTO.getUsername());
-      existingUser.setPassword(userDTO.getPassword());
-      existingUser.setFirstName(userDTO.getFirstName());
-      existingUser.setLastName(userDTO.getLastName());
-      User updatedUser = repository.save(existingUser);
-      return mapper.toUser(updatedUser);
-    });
-  }
-
-  @Override
-  public void deleteUserById(Long id) {
-    if (repository.existsById(id)) {
-      repository.deleteById(id);
-      log.info("User with id {} deleted.", id);
-    } else {
-      log.info("User with id {} not found.", id);
+  private void validateUserDTO(UserDTO userDTO) {
+    if (userDTO == null ||
+      userDTO.getUsername() == null || userDTO.getUsername().isBlank() ||
+      userDTO.getFirstName() == null || userDTO.getFirstName().isBlank() ||
+      userDTO.getLastName() == null || userDTO.getLastName().isBlank()) {
+      throw new IllegalArgumentException("Invalid user data");
     }
   }
 }

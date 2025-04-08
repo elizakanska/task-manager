@@ -22,16 +22,15 @@
     </tr>
     </thead>
     <tbody>
-      @for (user of users; track user.id) {
+      @for (user of users(); track user.id) {
         <tr>
           <td><a (click)="viewUserDetails(user.id)">{{ user.username }}</a></td>
           <td>{{ user.firstName }} {{ user.lastName }}</td>
           <td>
-            <button (click)="editUser(user)" class="btn btn-warning">
+            <button (click)="openUserForm(user)" class="btn btn-warning">
               <span nz-icon nzType="edit"></span>
               <span> Edit</span>
             </button>
-
             <button (click)="deleteUser(user.id)" class="btn btn-danger">
               <span nz-icon nzType="delete"></span>
               <span> Delete</span>
@@ -45,31 +44,63 @@
   <div class="modal" [ngClass]="{ 'is-visible': showUserForm }">
     <div class="modal-content custom-form">
       <form nz-form [formGroup]="userFormGroup" (ngSubmit)="saveUser()">
+        <h3>{{ editingUser ? 'Edit User' : 'Add New User' }}</h3>
 
-        <h3>{{ editingUser ? 'User Details' : 'Add User' }}</h3>
+        <nz-form-item>
+          <nz-form-label>Username</nz-form-label>
+          <nz-form-control [nzErrorTip]="'Username is required!'">
+            <input nz-input formControlName="username">
+          </nz-form-control>
+        </nz-form-item>
 
-        <app-form-control label="Username" formControlName="username" errorMessage="Username is required!"></app-form-control>
-        <app-form-control label="Password" type="password" formControlName="password" errorMessage="Password is required!"></app-form-control>
-        <app-form-control label="First Name" formControlName="firstName" errorMessage="First name is required!"></app-form-control>
-        <app-form-control label="Last Name" formControlName="lastName" errorMessage="Last name is required!"></app-form-control>
+        <nz-form-item>
+          <nz-form-label>First Name</nz-form-label>
+          <nz-form-control [nzErrorTip]="'First name is required!'">
+            <input nz-input formControlName="firstName">
+          </nz-form-control>
+        </nz-form-item>
+
+        <nz-form-item>
+          <nz-form-label>Last Name</nz-form-label>
+          <nz-form-control [nzErrorTip]="'Last name is required!'">
+            <input nz-input formControlName="lastName">
+          </nz-form-control>
+        </nz-form-item>
+
+        @if (editingUser) {
+          <nz-form-item>
+            <label nz-checkbox [(ngModel)]="changePassword" [ngModelOptions]="{standalone: true}">
+              Change Password
+            </label>
+          </nz-form-item>
+        }
+
+        @if (!editingUser || changePassword) {
+          <nz-form-item>
+            <nz-form-label>Password</nz-form-label>
+            <nz-form-control [nzErrorTip]="!editingUser ? 'Password is required!' : ''">
+              <input nz-input type="password" formControlName="password" [required]="!editingUser">
+            </nz-form-control>
+          </nz-form-item>
+        }
 
         <button
           nz-button
           class="login-form-button login-form-margin"
           [nzType]="'primary'"
-          [disabled]="userFormGroup.invalid">
-          {{ editingUser ? 'Update' : 'Create' }}
+          [disabled]="userFormGroup.invalid || isSubmitting"
+          type="submit">
+          {{ isSubmitting ? 'Processing...' : (editingUser ? 'Update' : 'Create') }}
         </button>
-
 
         <button
           nz-button
           class="login-form-button login-form-margin"
           (click)="closeUserForm(); $event.preventDefault()"
+          [disabled]="isSubmitting"
           nzType="default">
           Cancel
         </button>
-
       </form>
     </div>
   </div>
