@@ -30,24 +30,26 @@ public class UserServiceImpl implements UserService {
       ? repository.findByUsernameContainingIgnoreCaseOrFirstNameContainingIgnoreCaseOrLastNameContainingIgnoreCase(
       searchQuery, searchQuery, searchQuery)
       : repository.findAll();
-    return users.stream().map(mapper::toUser).toList();
+    return users.stream().map(mapper::toDTO).toList();
   }
 
   @Override
   public Optional<UserDTO> getUserById(Long id) {
-    return repository.findById(id).map(mapper::toUser);
+    return repository.findById(id).map(mapper::toDTO);
   }
 
   @Override
   public UserDTO createUser(UserDTO userDTO) {
     validateUserDTO(userDTO);
-    User newUser = mapper.toDto(userDTO);
-    return mapper.toUser(repository.save(newUser));
+    User entity = mapper.toUser(userDTO);
+    User savedEntity = repository.save(entity);
+    return mapper.toDTO(savedEntity);
   }
 
   @Override
   public UserDTO updateUser(Long id, UserDTO userDTO) {
     validateUserDTO(userDTO);
+
     User existingUser = repository.findById(id)
       .orElseThrow(() -> new EntityNotFoundException("User not found with id: " + id));
 
@@ -56,7 +58,7 @@ public class UserServiceImpl implements UserService {
     existingUser.setFirstName(userDTO.getFirstName());
     existingUser.setLastName(userDTO.getLastName());
 
-    return mapper.toUser(repository.save(existingUser));
+    return mapper.toDTO(existingUser);
   }
 
   @Override

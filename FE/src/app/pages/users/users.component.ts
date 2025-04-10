@@ -89,34 +89,51 @@ export class UsersComponent {
   saveUser(): void {
     if (this.userFormGroup.invalid || this.isSubmitting) return;
     this.isSubmitting = true;
-    const formValue = { ...this.userFormGroup.value };
-    if (this.editingUser && !this.changePassword) formValue.password = this.editingUser.password;
+
+    const formValue = {
+      ...this.userFormGroup.value,
+      id: this.editingUser?.id
+    };
+
+    if (this.editingUser && !this.changePassword) {
+      formValue.password = this.editingUser.password;
+    }
+
     const userOperation$ = this.editingUser
       ? this.userService.editUser(this.editingUser.id, formValue)
       : this.userService.addUser(formValue);
+
     userOperation$.pipe(
       takeUntilDestroyed(this.destroyRef),
       finalize(() => this.isSubmitting = false)
     ).subscribe({
-      next: user => {
-        this.users.update(current =>
-          this.editingUser
-            ? current.map(u => u.id === user.id ? user : u)
-            : [...current, user]
-        );
+      next: (savedUser) => {
+        this.users.update(currentUsers => {
+          if (this.editingUser) {
+            return currentUsers.map(u => u.id === savedUser.id ? savedUser : u);
+          } else {
+            return [...currentUsers, savedUser];
+          }
+        });
         this.closeUserForm();
+        this.searchTrigger$.next(this.searchQuery);
       },
-      error: err => console.error(err)
+      error: (err) => {
+        console.error('Error saving user:', err);
+      }
     });
   }
 
   deleteUser(id: number): void {
     if (confirm('Are you sure?')) {
+      this.users.update(current => current.filter(u => u.id !== id));
       this.userService.deleteUser(id).pipe(
         takeUntilDestroyed(this.destroyRef)
       ).subscribe({
-        next: () => this.users.update(current => current.filter(u => u.id !== id)),
-        error: err => console.error(err)
+        error: (err) => {
+          console.error(err);
+          this.searchTrigger$.next(this.searchQuery);
+        }
       });
     }
   }
