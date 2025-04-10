@@ -9,9 +9,11 @@ import org.mapstruct.Mapping;
 public interface TaskMapper {
   @Mapping(source = "type.id", target = "typeId")
   @Mapping(source = "status.id", target = "statusId")
+  @Mapping(source = "assignedTo.id", target = "assignedTo")
   TaskDTO fromTask(Task task);
 
   @Mapping(source = "typeId", target = "type.id")
   @Mapping(source = "statusId", target = "status.id")
+  @Mapping(source = "assignedTo", target = "assignedTo.id")
   Task fromDto(TaskDTO taskDTO);
 }

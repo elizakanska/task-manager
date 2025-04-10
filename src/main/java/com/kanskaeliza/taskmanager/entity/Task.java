@@ -28,6 +28,10 @@ public class Task {
   @JoinColumn(name = "status_id")
   private TaskStatus status;
 
+  @ManyToOne
+  @JoinColumn(name = "assignedto")
+  private User assignedTo;
+
   @Column(name = "created_on")
   private Date createdOn;
 }
