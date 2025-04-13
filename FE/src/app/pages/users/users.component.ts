@@ -1,3 +1,4 @@
+// user.component.ts
 import { ChangeDetectionStrategy, Component, DestroyRef, signal } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { UserService } from '../../services/user.service';
@@ -107,16 +108,9 @@ export class UsersComponent {
       takeUntilDestroyed(this.destroyRef),
       finalize(() => this.isSubmitting = false)
     ).subscribe({
-      next: (savedUser) => {
-        this.users.update(currentUsers => {
-          if (this.editingUser) {
-            return currentUsers.map(u => u.id === savedUser.id ? savedUser : u);
-          } else {
-            return [...currentUsers, savedUser];
-          }
-        });
+      next: (users) => {
+        this.users.set(users);
         this.closeUserForm();
-        this.searchTrigger$.next(this.searchQuery);
       },
       error: (err) => {
         console.error('Error saving user:', err);
@@ -126,10 +120,12 @@ export class UsersComponent {
 
   deleteUser(id: number): void {
     if (confirm('Are you sure?')) {
-      this.users.update(current => current.filter(u => u.id !== id));
       this.userService.deleteUser(id).pipe(
         takeUntilDestroyed(this.destroyRef)
       ).subscribe({
+        next: (users) => {
+          this.users.set(users);
+        },
         error: (err) => {
           console.error(err);
           this.searchTrigger$.next(this.searchQuery);

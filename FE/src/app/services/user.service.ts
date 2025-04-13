@@ -1,3 +1,4 @@
+// user.service.ts
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
@@ -25,20 +26,20 @@ export class UserService {
     );
   }
 
-  addUser(user: User): Observable<User> {
-    return this.http.post<User>(`${API_URL}/users`, user).pipe(
+  addUser(user: User): Observable<User[]> {
+    return this.http.post<User[]>(`${API_URL}/users`, user).pipe(
       catchError(handleError)
     );
   }
 
-  editUser(id: number, user: User): Observable<User> {
-    return this.http.put<User>(`${API_URL}/users/${id}`, user).pipe(
+  editUser(id: number, user: User): Observable<User[]> {
+    return this.http.put<User[]>(`${API_URL}/users/${id}`, user).pipe(
       catchError(handleError)
     );
   }
 
-  deleteUser(id: number): Observable<void> {
-    return this.http.delete<void>(`${API_URL}/users/${id}`).pipe(
+  deleteUser(id: number): Observable<User[]> {
+    return this.http.delete<User[]>(`${API_URL}/users/${id}`).pipe(
       catchError(handleError)
     );
   }

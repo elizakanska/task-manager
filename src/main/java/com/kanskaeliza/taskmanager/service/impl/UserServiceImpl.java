@@ -1,3 +1,4 @@
+// UserServiceImpl.java
 package com.kanskaeliza.taskmanager.service.impl;
 
 import com.kanskaeliza.taskmanager.entity.dto.UserDTO;
@@ -39,15 +40,15 @@ public class UserServiceImpl implements UserService {
   }
 
   @Override
-  public UserDTO createUser(UserDTO userDTO) {
+  public List<UserDTO> createUser(UserDTO userDTO) {
     validateUserDTO(userDTO);
     User entity = mapper.toUser(userDTO);
-    User savedEntity = repository.save(entity);
-    return mapper.toDTO(savedEntity);
+    repository.save(entity);
+    return getAllUsers(null);
   }
 
   @Override
-  public UserDTO updateUser(Long id, UserDTO userDTO) {
+  public List<UserDTO> updateUser(Long id, UserDTO userDTO) {
     validateUserDTO(userDTO);
 
     User existingUser = repository.findById(id)
@@ -58,15 +59,17 @@ public class UserServiceImpl implements UserService {
     existingUser.setFirstName(userDTO.getFirstName());
     existingUser.setLastName(userDTO.getLastName());
 
-    return mapper.toDTO(existingUser);
+    repository.save(existingUser);
+    return getAllUsers(null);
   }
 
   @Override
-  public void deleteUser(Long id) {
+  public List<UserDTO> deleteUser(Long id) {
     if (!repository.existsById(id)) {
       throw new EntityNotFoundException("User not found with id: " + id);
     }
     repository.deleteById(id);
+    return getAllUsers(null);
   }
 
   private void validateUserDTO(UserDTO userDTO) {
