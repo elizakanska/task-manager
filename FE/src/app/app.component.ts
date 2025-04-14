@@ -1,12 +1,19 @@
 import {Component} from '@angular/core';
 import {RouterLink, RouterOutlet} from '@angular/router';
-import {SharedModule} from './modules/shared/shared.module';
+import {
+  NzContentComponent,
+  NzFooterComponent,
+  NzHeaderComponent,
+  NzLayoutComponent,
+  NzSiderComponent
+} from 'ng-zorro-antd/layout';
+import {NzMenuDirective, NzMenuItemComponent} from 'ng-zorro-antd/menu';
+import {NzIconDirective} from 'ng-zorro-antd/icon';
 
 @Component({
   selector: 'app-root',
-  imports: [RouterLink, RouterOutlet, SharedModule],
+  imports: [RouterLink, RouterOutlet, NzLayoutComponent, NzSiderComponent, NzMenuDirective, NzMenuItemComponent, NzIconDirective, NzHeaderComponent, NzContentComponent, NzFooterComponent],
   templateUrl: './app.component.html',
-  standalone: true,
   styleUrl: './app.component.scss'
 })
 export class AppComponent {

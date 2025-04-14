@@ -7,6 +7,16 @@ CREATE SCHEMA taskmanager;
 -- Set schema usage
 SET search_path TO taskmanager;
 
+-- Create table within schema
+CREATE TABLE users
+(
+  id         SERIAL PRIMARY KEY,
+  username   VARCHAR(50)  NOT NULL UNIQUE,
+  password   VARCHAR(255) NOT NULL,
+  first_name VARCHAR(100),
+  last_name  VARCHAR(100)
+);
+
 -- Create table for task types
 CREATE TABLE task_types
 (
@@ -33,6 +43,12 @@ CREATE TABLE tasks
   CONSTRAINT fk_task_type FOREIGN KEY (type_id) REFERENCES task_types (id) ON DELETE CASCADE,
   CONSTRAINT fk_task_status FOREIGN KEY (status_id) REFERENCES task_statuses (id) ON DELETE CASCADE
 );
+
+-- Insert dummy data
+INSERT INTO users (username, password, first_name, last_name)
+VALUES ('john_doe', 'password123', 'John', 'Doe'),
+       ('jane_smith', 'password456', 'Jane', 'Smith'),
+       ('alice_walker', 'password789', 'Alice', 'Walker');
 
 -- Insert predefined task types
 INSERT INTO task_types (name)
@@ -76,6 +92,7 @@ VALUES ('Fix login bug', 'Resolve the issue causing login failures for certain u
         NOW() - INTERVAL '8 days');
 
 -- Verify inserted data
+SELECT * FROM users;
 SELECT * FROM task_types;
 SELECT * FROM task_statuses;
 SELECT * FROM tasks;
