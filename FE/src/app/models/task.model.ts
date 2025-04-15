@@ -4,5 +4,6 @@ export interface Task {
   description: string;
   typeId: number;
   statusId: number;
+  assignedTo: number | null;
   createdOn: Date;
 }
