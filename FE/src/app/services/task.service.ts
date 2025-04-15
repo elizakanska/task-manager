@@ -5,41 +5,39 @@ import { Task } from '../models/task.model';
 import { API_URL } from '../constants/constants';
 import { handleError } from './utils/errorHandler';
 
-
 @Injectable({
   providedIn: 'root'
 })
 export class TaskService {
-
   constructor(private http: HttpClient) { }
 
   getTasks(): Observable<Task[]> {
     return this.http.get<Task[]>(`${API_URL}/tasks`).pipe(
-        catchError(handleError)
+      catchError(handleError)
     );
   }
 
   getTaskById(id: number): Observable<Task> {
     return this.http.get<Task>(`${API_URL}/tasks/${id}`).pipe(
-        catchError(handleError)
+      catchError(handleError)
     );
   }
 
-  addTask(task: Task): Observable<Task> {
-    return this.http.post<Task>(`${API_URL}/tasks`, task).pipe(
-        catchError(handleError)
+  addTask(task: Task): Observable<Task[]> {
+    return this.http.post<Task[]>(`${API_URL}/tasks`, task).pipe(
+      catchError(handleError)
     );
   }
 
-  editTask(id: number, task: Task): Observable<Task> {
-    return this.http.put<Task>(`${API_URL}/tasks/${id}`, task).pipe(
-        catchError(handleError)
+  editTask(id: number, task: Task): Observable<Task[]> {
+    return this.http.put<Task[]>(`${API_URL}/tasks/${id}`, task).pipe(
+      catchError(handleError)
     );
   }
 
-  deleteTask(id: number): Observable<void> {
-    return this.http.delete<void>(`${API_URL}/tasks/${id}`).pipe(
-        catchError(handleError)
+  deleteTask(id: number): Observable<Task[]> {
+    return this.http.delete<Task[]>(`${API_URL}/tasks/${id}`).pipe(
+      catchError(handleError)
     );
   }
 

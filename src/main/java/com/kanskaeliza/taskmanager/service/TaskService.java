@@ -12,11 +12,11 @@ public interface TaskService {
 
   Optional<TaskDTO> getTaskById(Long id);
 
-  TaskDTO saveTask(TaskDTO taskdto);
+  List<TaskDTO> saveTask(TaskDTO taskdto);
 
-  Optional<TaskDTO> editTaskById(Long id, TaskDTO taskdto);
+  List<TaskDTO> editTaskById(Long id, TaskDTO taskdto);
 
-  void deleteTaskById(Long id);
+  List<TaskDTO> deleteTaskById(Long id);
 
   List<TaskType> getTaskTypes();
 

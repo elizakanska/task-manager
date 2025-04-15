@@ -29,31 +29,18 @@ public class TaskController {
   }
 
   @PostMapping("/tasks")
-  public ResponseEntity<TaskDTO> createTask(@RequestBody TaskDTO taskdto) {
-    if (taskdto == null) {
-      return ResponseEntity.badRequest().build();
-    }
-    TaskDTO savedTaskDTO = service.saveTask(taskdto);
-    return ResponseEntity.status(201).body(savedTaskDTO);
+  public ResponseEntity<List<TaskDTO>> createTask(@RequestBody TaskDTO taskdto) {
+    return ResponseEntity.ok(service.saveTask(taskdto));
   }
 
   @PutMapping("/tasks/{id}")
-  public ResponseEntity<TaskDTO> updateTask(@PathVariable Long id, @RequestBody TaskDTO taskdto) {
-    if (taskdto == null) {
-      return ResponseEntity.badRequest().build();
-    }
-    return service.editTaskById(id, taskdto)
-      .map(ResponseEntity::ok)
-      .orElse(ResponseEntity.notFound().build());
+  public ResponseEntity<List<TaskDTO>> updateTask(@PathVariable Long id, @RequestBody TaskDTO taskdto) {
+    return ResponseEntity.ok(service.editTaskById(id, taskdto));
   }
 
   @DeleteMapping("/tasks/{id}")
-  public ResponseEntity<Void> deleteTask(@PathVariable Long id) {
-    if (service.getTaskById(id).isEmpty()) {
-      return ResponseEntity.notFound().build();
-    }
-    service.deleteTaskById(id);
-    return ResponseEntity.noContent().build();
+  public ResponseEntity<List<TaskDTO>> deleteTask(@PathVariable Long id) {
+    return ResponseEntity.ok(service.deleteTaskById(id));
   }
 
   @GetMapping("/task-types")

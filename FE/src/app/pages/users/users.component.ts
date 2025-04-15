@@ -1,4 +1,3 @@
-// user.component.ts
 import { ChangeDetectionStrategy, Component, DestroyRef, signal } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { UserService } from '../../services/user.service';
