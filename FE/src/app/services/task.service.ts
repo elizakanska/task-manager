@@ -11,8 +11,9 @@ import { handleError } from './utils/errorHandler';
 export class TaskService {
   constructor(private http: HttpClient) { }
 
-  getTasks(): Observable<Task[]> {
-    return this.http.get<Task[]>(`${API_URL}/tasks`).pipe(
+  getTasks(searchQuery: string = ''): Observable<Task[]> {
+    const params = searchQuery ? { params: { searchQuery } } : {};
+    return this.http.get<Task[]>(`${API_URL}/tasks`, params).pipe(
       catchError(handleError)
     );
   }

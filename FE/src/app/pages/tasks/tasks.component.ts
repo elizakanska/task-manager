@@ -10,7 +10,7 @@ import { DatePipe, NgClass } from '@angular/common';
 import { NzSelectModule } from 'ng-zorro-antd/select';
 import { NzDatePickerModule } from 'ng-zorro-antd/date-picker';
 import { FormsModule } from '@angular/forms';
-import { BehaviorSubject, finalize, switchMap } from 'rxjs';
+import { BehaviorSubject, combineLatest, finalize, switchMap } from 'rxjs';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { User } from '../../models/user.model';
 import { UserService } from '../../services/user.service';
@@ -36,11 +36,10 @@ import { UserService } from '../../services/user.service';
 })
 export class TasksComponent {
   tasks = signal<Task[]>([]);
-  filteredTasks = signal<Task[]>([]);
-  searchQuery = '';
   showTaskForm = false;
   editingTask: Task | null = null;
   taskFormGroup: FormGroup;
+  searchQuery = '';
   selectedTask: Task | null = null;
   showTaskDetails = false;
   isSubmitting = false;
@@ -50,7 +49,8 @@ export class TasksComponent {
   newType = '';
   newStatus = '';
 
-  private dataRefresh$ = new BehaviorSubject<void>(undefined);
+  private searchTrigger$ = new BehaviorSubject<string>('');
+  private refreshData$ = new BehaviorSubject<void>(undefined);
 
   constructor(
     private fb: FormBuilder,
@@ -67,46 +67,46 @@ export class TasksComponent {
       assignedTo: [null]
     });
 
-    this.setupDataLoading();
+    this.setupDataStreams();
     this.loadStaticData();
   }
 
-  private setupDataLoading(): void {
-    this.dataRefresh$.pipe(
-      switchMap(() => this.taskService.getTasks()),
+  private setupDataStreams(): void {
+    combineLatest([
+      this.searchTrigger$,
+      this.refreshData$
+    ]).pipe(
+      switchMap(([query]) => this.taskService.getTasks(query)),
       takeUntilDestroyed(this.destroyRef)
     ).subscribe({
-      next: tasks => {
-        this.tasks.set(tasks);
-        this.applySearch();
-      },
+      next: tasks => this.tasks.set(tasks),
       error: err => console.error(err)
     });
   }
 
   private loadStaticData(): void {
-    this.taskService.getTaskTypes().pipe(takeUntilDestroyed(this.destroyRef)).subscribe(types => this.taskTypes.set(types));
-    this.taskService.getTaskStatuses().pipe(takeUntilDestroyed(this.destroyRef)).subscribe(statuses => this.taskStatuses.set(statuses));
-    this.userService.getUsers().pipe(takeUntilDestroyed(this.destroyRef)).subscribe(users => this.users.set(users));
-  }
-
-  searchTasks(): void {
-    this.applySearch();
-  }
-
-  private applySearch(): void {
-    const query = this.searchQuery.toLowerCase();
-    this.filteredTasks.set(this.tasks().filter(task =>
-      task.title.toLowerCase().includes(query) ||
-      task.description.toLowerCase().includes(query) ||
-      this.getTypeName(task.typeId).toLowerCase().includes(query) ||
-      this.getStatusName(task.statusId).toLowerCase().includes(query) ||
-      this.getAssignedUserName(task.assignedTo).toLowerCase().includes(query)
-    ));
+    combineLatest([
+      this.taskService.getTaskTypes(),
+      this.taskService.getTaskStatuses(),
+      this.userService.getUsers()
+    ]).pipe(
+      takeUntilDestroyed(this.destroyRef)
+    ).subscribe({
+      next: ([types, statuses, users]) => {
+        this.taskTypes.set(types);
+        this.taskStatuses.set(statuses);
+        this.users.set(users);
+      },
+      error: err => console.error('Error loading static data:', err)
+    });
   }
 
   refreshTasks(): void {
-    this.dataRefresh$.next();
+    this.refreshData$.next();
+  }
+
+  searchTasks(): void {
+    this.searchTrigger$.next(this.searchQuery.trim());
   }
 
   openTaskForm(task: Task | null = null): void {
@@ -134,10 +134,7 @@ export class TasksComponent {
 
     const formValue = {
       ...this.taskFormGroup.value,
-      id: this.editingTask?.id,
-      typeId: this.taskFormGroup.value.typeId,
-      statusId: this.taskFormGroup.value.statusId,
-      assignedTo: this.taskFormGroup.value.assignedTo
+      id: this.editingTask?.id
     };
 
     const taskOperation$ = this.editingTask
@@ -158,7 +155,9 @@ export class TasksComponent {
 
   deleteTask(id: number): void {
     if (confirm('Are you sure?')) {
-      this.taskService.deleteTask(id).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+      this.taskService.deleteTask(id).pipe(
+        takeUntilDestroyed(this.destroyRef)
+      ).subscribe({
         next: () => this.refreshTasks(),
         error: (err) => {
           console.error(err);
@@ -196,22 +195,28 @@ export class TasksComponent {
 
   addNewType(): void {
     if (!this.newType.trim()) return;
-    this.taskService.addNewType(this.newType.trim()).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
-      next: () => this.taskService.getTaskTypes().pipe(takeUntilDestroyed(this.destroyRef)).subscribe(types => {
+    this.taskService.addNewType(this.newType.trim()).pipe(
+      switchMap(() => this.taskService.getTaskTypes()),
+      takeUntilDestroyed(this.destroyRef)
+    ).subscribe({
+      next: types => {
         this.taskTypes.set(types);
         this.newType = '';
-      }),
+      },
       error: (err) => console.error('Failed to add type:', err)
     });
   }
 
   addNewStatus(): void {
     if (!this.newStatus.trim()) return;
-    this.taskService.addNewStatus(this.newStatus.trim()).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
-      next: () => this.taskService.getTaskStatuses().pipe(takeUntilDestroyed(this.destroyRef)).subscribe(statuses => {
+    this.taskService.addNewStatus(this.newStatus.trim()).pipe(
+      switchMap(() => this.taskService.getTaskStatuses()),
+      takeUntilDestroyed(this.destroyRef)
+    ).subscribe({
+      next: statuses => {
         this.taskStatuses.set(statuses);
         this.newStatus = '';
-      }),
+      },
       error: (err) => console.error('Failed to add status:', err)
     });
   }

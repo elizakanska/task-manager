@@ -5,7 +5,7 @@
     <input
       type="text"
       [(ngModel)]="searchQuery"
-      placeholder="Search tasks..."
+      placeholder="Search by title"
       class="search-bar"
       (input)="searchTasks()"/>
 
@@ -26,7 +26,7 @@
     </tr>
     </thead>
     <tbody>
-      @for (task of filteredTasks(); track task.id) {
+      @for (task of tasks(); track task.id) {
         <tr>
           <td><a (click)="viewTaskDetails(task.id)">{{ task.title }}</a></td>
           <td>{{ getTypeName(task.typeId) }}</td>
@@ -75,7 +75,7 @@
               }
             </nz-select>
             <ng-template #typeTemplate>
-              <div style="padding: 8px">
+              <div>
                 <input
                   nz-input
                   [(ngModel)]="newType"
@@ -105,7 +105,7 @@
               }
             </nz-select>
             <ng-template #statusTemplate>
-              <div style="padding: 8px">
+              <div>
                 <input
                   nz-input
                   [(ngModel)]="newStatus"

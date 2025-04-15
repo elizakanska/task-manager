@@ -37,10 +37,12 @@ public class TaskServiceImpl implements TaskService {
   }
 
   @Override
-  public List<TaskDTO> getAllTasks() {
-    return repository.findAll().stream()
-      .map(mapper::fromTask)
-      .toList();
+  public List<TaskDTO> getAllTasks(String searchQuery) {
+    List<Task> tasks = searchQuery != null && !searchQuery.isEmpty()
+      ? repository.findByTitleContainingIgnoreCaseOrDescriptionIgnoringCase(
+      searchQuery, searchQuery)
+      : repository.findAll();
+    return tasks.stream().map(mapper::fromTask).toList();
   }
 
   @Override
@@ -50,11 +52,11 @@ public class TaskServiceImpl implements TaskService {
   }
 
   @Override
-  public List<TaskDTO> saveTask(TaskDTO taskdto) {
-    validateTask(taskdto);
+  public List<TaskDTO> saveTask(TaskDTO taskDto) {
+    validateTask(taskDto);
 
-    Task task = mapper.fromDto(taskdto);
-    return getTaskDTOS(taskdto, task);
+    Task task = mapper.fromDto(taskDto);
+    return getTaskDTOS(taskDto, task);
   }
 
   private void validateTask(TaskDTO task) {
@@ -64,23 +66,23 @@ public class TaskServiceImpl implements TaskService {
   }
 
   @Override
-  public List<TaskDTO> editTaskById(Long id, TaskDTO taskdto) {
+  public List<TaskDTO> editTaskById(Long id, TaskDTO taskDto) {
     Task existingTask = repository.findById(id)
       .orElseThrow(() -> new EntityNotFoundException("Task not found with id: " + id));
 
-    existingTask.setTitle(taskdto.getTitle());
-    existingTask.setDescription(taskdto.getDescription());
-    existingTask.setCreatedOn(taskdto.getCreatedOn());
-    return getTaskDTOS(taskdto, existingTask);
+    existingTask.setTitle(taskDto.getTitle());
+    existingTask.setDescription(taskDto.getDescription());
+    existingTask.setCreatedOn(taskDto.getCreatedOn());
+    return getTaskDTOS(taskDto, existingTask);
   }
 
-  private List<TaskDTO> getTaskDTOS(TaskDTO taskdto, Task existingTask) {
-    existingTask.setType(typeRepository.findById(taskdto.getTypeId()).orElseThrow(() -> new IllegalArgumentException("Invalid Type ID")));
-    existingTask.setStatus(statusRepository.findById(taskdto.getStatusId()).orElseThrow(() -> new IllegalArgumentException("Invalid Status ID")));
-    existingTask.setAssignedTo(userRepository.findById(taskdto.getAssignedTo()).orElseThrow(() -> new IllegalArgumentException("Invalid Assigned To")));
+  private List<TaskDTO> getTaskDTOS(TaskDTO taskDto, Task existingTask) {
+    existingTask.setType(typeRepository.findById(taskDto.getTypeId()).orElseThrow(() -> new IllegalArgumentException("Invalid Type ID")));
+    existingTask.setStatus(statusRepository.findById(taskDto.getStatusId()).orElseThrow(() -> new IllegalArgumentException("Invalid Status ID")));
+    existingTask.setAssignedTo(userRepository.findById(taskDto.getAssignedTo()).orElseThrow(() -> new IllegalArgumentException("Invalid Assigned To")));
 
     repository.save(existingTask);
-    return getAllTasks();
+    return getAllTasks(null);
   }
 
   @Override
@@ -90,7 +92,7 @@ public class TaskServiceImpl implements TaskService {
     }
     repository.deleteById(id);
     log.info("Task with id {} deleted.", id);
-    return getAllTasks();
+    return getAllTasks(null);
   }
 
   @Override

@@ -17,8 +17,8 @@ public class TaskController {
   private final TaskService service;
 
   @GetMapping("/tasks")
-  public ResponseEntity<List<TaskDTO>> getAllTasks() {
-    return ResponseEntity.ok(service.getAllTasks());
+  public ResponseEntity<List<TaskDTO>> getAllTasks(@RequestParam(required = false) String searchQuery) {
+    return ResponseEntity.ok(service.getAllTasks(searchQuery));
   }
 
   @GetMapping("/tasks/{id}")

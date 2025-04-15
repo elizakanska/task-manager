@@ -8,9 +8,10 @@ import java.util.List;
 import java.util.Optional;
 
 public interface TaskService {
-  List<TaskDTO> getAllTasks();
 
-  Optional<TaskDTO> getTaskById(Long id);
+    List<TaskDTO> getAllTasks(String searchQuery);
+
+    Optional<TaskDTO> getTaskById(Long id);
 
   List<TaskDTO> saveTask(TaskDTO taskdto);
 
