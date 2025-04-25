@@ -1,5 +1,6 @@
 import { ChangeDetectionStrategy, Component, DestroyRef, signal } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { Router } from '@angular/router';
 import { UserService } from '../../services/user.service';
 import { User } from '../../models/user.model';
 import { NzButtonModule } from 'ng-zorro-antd/button';
@@ -45,7 +46,8 @@ export class UsersComponent {
   constructor(
     private fb: FormBuilder,
     private userService: UserService,
-    private destroyRef: DestroyRef
+    private destroyRef: DestroyRef,
+    private router: Router
   ) {
     this.userFormGroup = this.fb.group({
       username: ['', Validators.required],
@@ -135,7 +137,7 @@ export class UsersComponent {
 
   viewUserDetails(userId: number): void {
     this.selectedUser = this.users().find(u => u.id === userId) ?? null;
-    this.showUserDetails = !!this.selectedUser;
+    this.selectedUser ? this.showUserDetails = true : this.router.navigate(['/notfound']);
   }
 
   closeUserDetails(): void {

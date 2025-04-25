@@ -1,7 +1,10 @@
 import { ChangeDetectionStrategy, Component, DestroyRef, signal } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { Router } from '@angular/router';
 import { TaskService } from '../../services/task.service';
 import { Task } from '../../models/task.model';
+import { Status } from '../../models/status.model';
+import { Type } from '../../models/type.model';
 import { NzButtonModule } from 'ng-zorro-antd/button';
 import { NzIconModule } from 'ng-zorro-antd/icon';
 import { NzInputModule } from 'ng-zorro-antd/input';
@@ -16,10 +19,7 @@ import { User } from '../../models/user.model';
 import { UserService } from '../../services/user.service';
 
 @Component({
-  selector: 'app-tasks',
-  templateUrl: './tasks.component.html',
-  styleUrls: ['./tasks.component.scss'],
-  standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     NzButtonModule,
     NzIconModule,
@@ -32,7 +32,10 @@ import { UserService } from '../../services/user.service';
     FormsModule,
     DatePipe
   ],
-  changeDetection: ChangeDetectionStrategy.OnPush
+  selector: 'app-tasks',
+  standalone: true,
+  styleUrls: ['./tasks.component.scss'],
+  templateUrl: './tasks.component.html'
 })
 export class TasksComponent {
   tasks = signal<Task[]>([]);
@@ -43,19 +46,20 @@ export class TasksComponent {
   selectedTask: Task | null = null;
   showTaskDetails = false;
   isSubmitting = false;
-  taskTypes = signal<{ id: number; name: string }[]>([]);
-  taskStatuses = signal<{ id: number; name: string }[]>([]);
+  taskTypes = signal<Type[]>([]);
+  taskStatuses = signal<Status[]>([]);
   users = signal<User[]>([]);
   newType = '';
   newStatus = '';
 
-  private searchTrigger$ = new BehaviorSubject<string>('');
+  private searchTriggerSubj = new BehaviorSubject<string>('');
 
   constructor(
     private fb: FormBuilder,
     private taskService: TaskService,
     private userService: UserService,
-    private destroyRef: DestroyRef
+    private destroyRef: DestroyRef,
+    private router: Router
   ) {
     this.taskFormGroup = this.fb.group({
       title: ['', Validators.required],
@@ -71,7 +75,7 @@ export class TasksComponent {
   }
 
   private setupDataStreams(): void {
-    this.searchTrigger$.pipe(
+    this.searchTriggerSubj.pipe(
       switchMap(query => this.taskService.getTasks(query)),
       takeUntilDestroyed(this.destroyRef)
     ).subscribe({
@@ -98,7 +102,7 @@ export class TasksComponent {
   }
 
   searchTasks(): void {
-    this.searchTrigger$.next(this.searchQuery.trim());
+    this.searchTriggerSubj.next(this.searchQuery.trim());
   }
 
   openTaskForm(task: Task | null = null): void {
@@ -156,7 +160,7 @@ export class TasksComponent {
         next: (updatedTasks) => this.tasks.set(updatedTasks),
         error: (err) => {
           console.error(err);
-          this.searchTrigger$.next(this.searchQuery.trim());
+          this.searchTasks();
         }
       });
     }
@@ -164,7 +168,7 @@ export class TasksComponent {
 
   viewTaskDetails(taskId: number): void {
     this.selectedTask = this.tasks().find(t => t.id === taskId) ?? null;
-    this.showTaskDetails = !!this.selectedTask;
+    this.selectedTask ? this.showTaskDetails = true : this.router.navigate(['/notfound']);
   }
 
   closeTaskDetails(): void {
@@ -172,12 +176,12 @@ export class TasksComponent {
     this.selectedTask = null;
   }
 
-  getTypeName(typeId: number): string {
+  getTypeName(typeId: number | null): string {
     const type = this.taskTypes().find(t => t.id === typeId);
     return type?.name || 'Unknown Type';
   }
 
-  getStatusName(statusId: number): string {
+  getStatusName(statusId: number | null): string {
     const status = this.taskStatuses().find(s => s.id === statusId);
     return status?.name || 'Unknown Status';
   }
@@ -189,8 +193,10 @@ export class TasksComponent {
   }
 
   addNewType(): void {
-    if (!this.newType.trim()) return;
-    this.taskService.addNewType(this.newType.trim()).pipe(
+    const typeName = this.newType.trim();
+    if (!typeName) return;
+
+    this.taskService.addNewType(typeName).pipe(
       takeUntilDestroyed(this.destroyRef)
     ).subscribe({
       next: (types) => {
@@ -199,12 +205,13 @@ export class TasksComponent {
       },
       error: (err) => console.error('Failed to add type:', err)
     });
-
   }
 
   addNewStatus(): void {
-    if (!this.newStatus.trim()) return;
-    this.taskService.addNewStatus(this.newStatus.trim()).pipe(
+    const statusName = this.newStatus.trim();
+    if (!statusName) return;
+
+    this.taskService.addNewStatus(statusName).pipe(
       takeUntilDestroyed(this.destroyRef)
     ).subscribe({
       next: (statuses) => {

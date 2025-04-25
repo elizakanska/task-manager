@@ -50,7 +50,7 @@ public class TaskController {
 
   @PostMapping("/task-types")
   public ResponseEntity<List<TaskType>> addNewTaskType(@RequestBody TaskType taskType) {
-    if (taskType == null || taskType.getName() == null || taskType.getName().trim().isEmpty()) {
+    if (taskType == null || taskType.getName() == null || taskType.getName().isEmpty()) {
       return ResponseEntity.badRequest().build();
     }
 
@@ -64,7 +64,7 @@ public class TaskController {
 
   @PostMapping("/task-statuses")
   public ResponseEntity<List<TaskStatus>> addNewTaskStatus(@RequestBody TaskStatus taskStatus) {
-    if (taskStatus == null || taskStatus.getName() == null || taskStatus.getName().trim().isEmpty()) {
+    if (taskStatus == null || taskStatus.getName() == null || taskStatus.getName().isEmpty()) {
       return ResponseEntity.badRequest().build();
     }
 
