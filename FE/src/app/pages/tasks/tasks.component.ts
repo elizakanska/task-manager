@@ -169,7 +169,7 @@ export class TasksComponent {
 
   viewTaskDetails(taskId: number): void {
     this.selectedTask = this.tasks().find(t => t.id === taskId) ?? null;
-    this.selectedTask ? this.showTaskDetails = true : this.router.navigate(['/notfound']);
+    this.selectedTask ? this.showTaskDetails = true : this.router.navigate(['/not-found']);
   }
 
   closeTaskDetails(): void {
@@ -177,22 +177,12 @@ export class TasksComponent {
     this.selectedTask = null;
   }
 
-  getTypeName(typeId: number | undefined): string {
-    return this.taskTypes().get(<number>typeId)?.name ?? this.handleMissingType(typeId);
+  getTypeName(typeId: number): string {
+    return this.taskTypes().get(typeId)?.name ?? 'INVALID TYPE';
   }
 
-  getStatusName(statusId: number | undefined): string {
-    return this.taskStatuses().get(<number>statusId)?.name ?? this.handleMissingStatus(statusId);
-  }
-
-  private handleMissingType(typeId: number | undefined): string {
-    console.error(`Type with ID ${typeId} not found in predefined types`);
-    return 'INVALID TYPE';
-  }
-
-  private handleMissingStatus(statusId: number | undefined): string {
-    console.error(`Status with ID ${statusId} not found in predefined statuses`);
-    return 'INVALID STATUS';
+  getStatusName(statusId: number): string {
+    return this.taskStatuses().get(statusId)?.name ?? 'INVALID STATUS';
   }
 
   getAssignedUserName(assignedTo: number | null | undefined): string {

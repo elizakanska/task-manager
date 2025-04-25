@@ -137,7 +137,7 @@ export class UsersComponent {
 
   viewUserDetails(userId: number): void {
     this.selectedUser = this.users().find(u => u.id === userId) ?? null;
-    this.selectedUser ? this.showUserDetails = true : this.router.navigate(['/notfound']);
+    this.selectedUser ? this.showUserDetails = true : this.router.navigate(['/not-found']);
   }
 
   closeUserDetails(): void {

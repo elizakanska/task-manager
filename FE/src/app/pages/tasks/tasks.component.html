@@ -174,8 +174,8 @@
       <h3>Task Details</h3>
       <p><strong>Title:</strong> {{ selectedTask?.title }}</p>
       <p><strong>Description:</strong> {{ selectedTask?.description }}</p>
-      <p><strong>Type:</strong> {{ getTypeName(selectedTask?.typeId) }}</p>
-      <p><strong>Status:</strong> {{ getStatusName(selectedTask?.statusId) }}</p>
+      <p><strong>Type:</strong> {{ getTypeName((selectedTask?.typeId ?? 0)) }}</p>
+      <p><strong>Status:</strong> {{ getStatusName(selectedTask?.statusId ?? 0) }}</p>
       <p><strong>Assigned To:</strong> {{ getAssignedUserName(selectedTask?.assignedTo) }}</p>
       <p><strong>Created On:</strong> {{ selectedTask?.createdOn | date:'dd-MMM-yyyy' }}</p>
       <button nz-button nzType="default" (click)="closeTaskDetails()">Close</button>
