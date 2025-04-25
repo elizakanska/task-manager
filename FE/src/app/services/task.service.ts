@@ -2,6 +2,8 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { catchError, Observable } from 'rxjs';
 import { Task } from '../models/task.model';
+import { Status } from '../models/status.model';
+import { Type } from '../models/type.model';
 import { API_URL } from '../constants/constants';
 import { handleError } from './utils/errorHandler';
 
@@ -42,26 +44,26 @@ export class TaskService {
     );
   }
 
-  getTaskTypes(): Observable<{ id: number, name: string }[]> {
-    return this.http.get<{ id: number, name: string }[]>(`${API_URL}/task-types`).pipe(
+  getTaskTypes(): Observable<Type[]> {
+    return this.http.get<Type[]>(`${API_URL}/task-types`).pipe(
       catchError(handleError)
     );
   }
 
-  getTaskStatuses(): Observable<{ id: number, name: string }[]> {
-    return this.http.get<{ id: number, name: string }[]>(`${API_URL}/task-statuses`).pipe(
+  getTaskStatuses(): Observable<Status[]> {
+    return this.http.get<Status[]>(`${API_URL}/task-statuses`).pipe(
       catchError(handleError)
     );
   }
 
-  addNewType(newType: string): Observable<{ id: number, name: string }[]> {
-    return this.http.post<{ id: number, name: string }[]>(`${API_URL}/task-types`, { name: newType }).pipe(
+  addNewType(newType: string): Observable<Type[]> {
+    return this.http.post<Type[]>(`${API_URL}/task-types`, { name: newType }).pipe(
       catchError(handleError)
     );
   }
 
-  addNewStatus(newStatus: string): Observable<{ id: number, name: string }[]> {
-    return this.http.post<{ id: number, name: string }[]>(`${API_URL}/task-statuses`, { name: newStatus }).pipe(
+  addNewStatus(newStatus: string): Observable<Status[]> {
+    return this.http.post<Status[]>(`${API_URL}/task-statuses`, { name: newStatus }).pipe(
       catchError(handleError)
     );
   }
