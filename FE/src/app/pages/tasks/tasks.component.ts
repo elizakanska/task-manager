@@ -46,8 +46,8 @@ export class TasksComponent {
   selectedTask: Task | null = null;
   showTaskDetails = false;
   isSubmitting = false;
-  taskTypes = signal<Type[]>([]);
-  taskStatuses = signal<Status[]>([]);
+  taskTypes = signal<Map<number, Type>>(new Map());
+  taskStatuses = signal<Map<number, Status>>(new Map());
   users = signal<User[]>([]);
   newType = '';
   newStatus = '';
@@ -93,8 +93,8 @@ export class TasksComponent {
       takeUntilDestroyed(this.destroyRef)
     ).subscribe({
       next: ([types, statuses, users]) => {
-        this.taskTypes.set(types);
-        this.taskStatuses.set(statuses);
+        this.taskTypes.set(new Map(types.map(t => [t.id, t])));
+        this.taskStatuses.set(new Map(statuses.map(s => [s.id, s])));
         this.users.set(users);
       },
       error: err => console.error('Error loading static data:', err)
@@ -176,14 +176,22 @@ export class TasksComponent {
     this.selectedTask = null;
   }
 
-  getTypeName(typeId: number | null): string {
-    const type = this.taskTypes().find(t => t.id === typeId);
-    return type?.name || 'Unknown Type';
+  getTypeName(typeId: number): string {
+    return this.taskTypes().get(typeId)?.name ?? this.handleMissingType(typeId);
   }
 
-  getStatusName(statusId: number | null): string {
-    const status = this.taskStatuses().find(s => s.id === statusId);
-    return status?.name || 'Unknown Status';
+  getStatusName(statusId: number): string {
+    return this.taskStatuses().get(statusId)?.name ?? this.handleMissingStatus(statusId);
+  }
+
+  private handleMissingType(typeId: number): string {
+    console.error(`Type with ID ${typeId} not found in predefined types`);
+    return 'INVALID TYPE';
+  }
+
+  private handleMissingStatus(statusId: number): string {
+    console.error(`Status with ID ${statusId} not found in predefined statuses`);
+    return 'INVALID STATUS';
   }
 
   getAssignedUserName(assignedTo: number | null): string {
@@ -199,8 +207,9 @@ export class TasksComponent {
     this.taskService.addNewType(typeName).pipe(
       takeUntilDestroyed(this.destroyRef)
     ).subscribe({
-      next: (types) => {
-        this.taskTypes.set(types);
+      next: (typesArray) => {
+        const updatedTypes = new Map(typesArray.map(t => [t.id, t]));
+        this.taskTypes.set(updatedTypes);
         this.newType = '';
       },
       error: (err) => console.error('Failed to add type:', err)
@@ -214,8 +223,9 @@ export class TasksComponent {
     this.taskService.addNewStatus(statusName).pipe(
       takeUntilDestroyed(this.destroyRef)
     ).subscribe({
-      next: (statuses) => {
-        this.taskStatuses.set(statuses);
+      next: (statusesArray) => {
+        const updatedStatuses = new Map(statusesArray.map(s => [s.id, s]));
+        this.taskStatuses.set(updatedStatuses);
         this.newStatus = '';
       },
       error: (err) => console.error('Failed to add status:', err)
