@@ -9,7 +9,7 @@ import { NzButtonModule } from 'ng-zorro-antd/button';
 import { NzIconModule } from 'ng-zorro-antd/icon';
 import { NzInputModule } from 'ng-zorro-antd/input';
 import { NzFormModule } from 'ng-zorro-antd/form';
-import { DatePipe, NgClass } from '@angular/common';
+import {DatePipe, KeyValuePipe, NgClass} from '@angular/common';
 import { NzSelectModule } from 'ng-zorro-antd/select';
 import { NzDatePickerModule } from 'ng-zorro-antd/date-picker';
 import { FormsModule } from '@angular/forms';
@@ -30,7 +30,8 @@ import { UserService } from '../../services/user.service';
     NzSelectModule,
     NzDatePickerModule,
     FormsModule,
-    DatePipe
+    DatePipe,
+    KeyValuePipe
   ],
   selector: 'app-tasks',
   standalone: true,
@@ -176,25 +177,25 @@ export class TasksComponent {
     this.selectedTask = null;
   }
 
-  getTypeName(typeId: number): string {
-    return this.taskTypes().get(typeId)?.name ?? this.handleMissingType(typeId);
+  getTypeName(typeId: number | undefined): string {
+    return this.taskTypes().get(<number>typeId)?.name ?? this.handleMissingType(typeId);
   }
 
-  getStatusName(statusId: number): string {
-    return this.taskStatuses().get(statusId)?.name ?? this.handleMissingStatus(statusId);
+  getStatusName(statusId: number | undefined): string {
+    return this.taskStatuses().get(<number>statusId)?.name ?? this.handleMissingStatus(statusId);
   }
 
-  private handleMissingType(typeId: number): string {
+  private handleMissingType(typeId: number | undefined): string {
     console.error(`Type with ID ${typeId} not found in predefined types`);
     return 'INVALID TYPE';
   }
 
-  private handleMissingStatus(statusId: number): string {
+  private handleMissingStatus(statusId: number | undefined): string {
     console.error(`Status with ID ${statusId} not found in predefined statuses`);
     return 'INVALID STATUS';
   }
 
-  getAssignedUserName(assignedTo: number | null): string {
+  getAssignedUserName(assignedTo: number | null | undefined): string {
     if (assignedTo === null) return 'UNASSIGNED';
     const user = this.users().find(u => u.id === assignedTo);
     return user ? `${user.firstName} ${user.lastName} (${user.username})` : 'UNASSIGNED';

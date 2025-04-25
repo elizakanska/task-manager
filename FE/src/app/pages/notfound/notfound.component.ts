@@ -9,6 +9,6 @@ import {RouterLink} from '@angular/router';
   templateUrl: './notfound.component.html',
   styleUrl: './notfound.component.scss'
 })
-export class NotfoundComponent {
+export class NotFoundComponent {
 
 }

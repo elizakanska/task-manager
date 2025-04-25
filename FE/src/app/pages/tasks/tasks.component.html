@@ -70,8 +70,8 @@
           <nz-form-label>Type</nz-form-label>
           <nz-form-control [nzErrorTip]="'Type is required!'">
             <nz-select formControlName="typeId" [nzDropdownRender]="typeTemplate">
-              @for (type of taskTypes(); track type.id) {
-                <nz-option [nzValue]="type.id" [nzLabel]="type.name"></nz-option>
+              @for (typeEntry of taskTypes() | keyvalue; track typeEntry.key) {
+                <nz-option [nzValue]="typeEntry.key" [nzLabel]="typeEntry.value.name"></nz-option>
               }
             </nz-select>
             <ng-template #typeTemplate>
@@ -100,8 +100,8 @@
           <nz-form-label>Status</nz-form-label>
           <nz-form-control [nzErrorTip]="'Status is required!'">
             <nz-select formControlName="statusId" [nzDropdownRender]="statusTemplate">
-              @for (status of taskStatuses(); track status.id) {
-                <nz-option [nzValue]="status.id" [nzLabel]="status.name"></nz-option>
+              @for (statusEntry of taskStatuses() | keyvalue; track statusEntry.key) {
+                <nz-option [nzValue]="statusEntry.key" [nzLabel]="statusEntry.value.name"></nz-option>
               }
             </nz-select>
             <ng-template #statusTemplate>
@@ -174,9 +174,9 @@
       <h3>Task Details</h3>
       <p><strong>Title:</strong> {{ selectedTask?.title }}</p>
       <p><strong>Description:</strong> {{ selectedTask?.description }}</p>
-      <p><strong>Type:</strong> {{ getTypeName(selectedTask?.typeId ?? null) }}</p>
-      <p><strong>Status:</strong> {{ getStatusName(selectedTask?.statusId ?? null) }}</p>
-      <p><strong>Assigned To:</strong> {{ getAssignedUserName(selectedTask?.assignedTo ?? null) }}</p>
+      <p><strong>Type:</strong> {{ getTypeName(selectedTask?.typeId) }}</p>
+      <p><strong>Status:</strong> {{ getStatusName(selectedTask?.statusId) }}</p>
+      <p><strong>Assigned To:</strong> {{ getAssignedUserName(selectedTask?.assignedTo) }}</p>
       <p><strong>Created On:</strong> {{ selectedTask?.createdOn | date:'dd-MMM-yyyy' }}</p>
       <button nz-button nzType="default" (click)="closeTaskDetails()">Close</button>
     </div>
