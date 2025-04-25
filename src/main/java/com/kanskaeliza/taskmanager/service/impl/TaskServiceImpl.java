@@ -67,6 +67,7 @@ public class TaskServiceImpl implements TaskService {
 
   @Override
   public List<TaskDTO> editTaskById(Long id, TaskDTO taskDto) {
+    validateTask(taskDto);
     Task existingTask = repository.findById(id)
       .orElseThrow(() -> new EntityNotFoundException("Task not found with id: " + id));
 
@@ -77,12 +78,30 @@ public class TaskServiceImpl implements TaskService {
   }
 
   private List<TaskDTO> getTaskDTOS(TaskDTO taskDto, Task existingTask) {
-    existingTask.setType(typeRepository.findById(taskDto.getTypeId()).orElseThrow(() -> new IllegalArgumentException("Invalid Type ID")));
-    existingTask.setStatus(statusRepository.findById(taskDto.getStatusId()).orElseThrow(() -> new IllegalArgumentException("Invalid Status ID")));
-    existingTask.setAssignedTo(userRepository.findById(taskDto.getAssignedTo()).orElseThrow(() -> new IllegalArgumentException("Invalid Assigned To")));
+    try {
+      if (taskDto.getTypeId() == null) {
+        throw new IllegalArgumentException("Type ID cannot be null");
+      }
+      existingTask.setType(typeRepository.findById(taskDto.getTypeId())
+        .orElseThrow(() -> new IllegalArgumentException("Invalid Type ID: " + taskDto.getTypeId())));
 
-    repository.save(existingTask);
-    return getAllTasks(null);
+      if (taskDto.getStatusId() == null) {
+        throw new IllegalArgumentException("Status ID cannot be null");
+      }
+      existingTask.setStatus(statusRepository.findById(taskDto.getStatusId())
+        .orElseThrow(() -> new IllegalArgumentException("Invalid Status ID: " + taskDto.getStatusId())));
+
+      if (taskDto.getAssignedTo() != null) {
+        existingTask.setAssignedTo(userRepository.findById(taskDto.getAssignedTo())
+          .orElseThrow(() -> new IllegalArgumentException("Invalid Assigned To ID: " + taskDto.getAssignedTo())));
+      }
+
+      repository.save(existingTask);
+      return getAllTasks(null);
+    } catch (Exception e) {
+      log.error("Error updating task: {}", e.getMessage());
+      throw e;
+    }
   }
 
   @Override
@@ -106,7 +125,7 @@ public class TaskServiceImpl implements TaskService {
   }
 
   @Override
-  public void addTaskType(TaskType taskType) {
+  public List<TaskType> addTaskType(TaskType taskType) {
     if (taskType == null || taskType.getName().isBlank()) {
       throw new IllegalArgumentException("Type name cannot be empty");
     }
@@ -115,10 +134,11 @@ public class TaskServiceImpl implements TaskService {
       typeRepository.save(taskType);
       log.info("Added new task type: {}", taskType.getName());
     }
+    return typeRepository.findAll();
   }
 
   @Override
-  public void addTaskStatus(TaskStatus taskStatus) {
+  public List<TaskStatus> addTaskStatus(TaskStatus taskStatus) {
     if (taskStatus == null || taskStatus.getName().isBlank()) {
       throw new IllegalArgumentException("Status name cannot be empty");
     }
@@ -127,5 +147,6 @@ public class TaskServiceImpl implements TaskService {
       statusRepository.save(taskStatus);
       log.info("Added new task status: {}", taskStatus.getName());
     }
+    return statusRepository.findAll();
   }
 }

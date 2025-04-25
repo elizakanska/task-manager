@@ -49,13 +49,12 @@ public class TaskController {
   }
 
   @PostMapping("/task-types")
-  public ResponseEntity<Void> addNewTaskType(@RequestBody TaskType taskType) {
+  public ResponseEntity<List<TaskType>> addNewTaskType(@RequestBody TaskType taskType) {
     if (taskType == null || taskType.getName() == null || taskType.getName().trim().isEmpty()) {
       return ResponseEntity.badRequest().build();
     }
 
-    service.addTaskType(taskType);
-    return ResponseEntity.status(201).build();
+    return ResponseEntity.ok(service.addTaskType(taskType));
   }
 
   @GetMapping("/task-statuses")
@@ -64,12 +63,11 @@ public class TaskController {
   }
 
   @PostMapping("/task-statuses")
-  public ResponseEntity<Void> addNewTaskStatus(@RequestBody TaskStatus taskStatus) {
+  public ResponseEntity<List<TaskStatus>> addNewTaskStatus(@RequestBody TaskStatus taskStatus) {
     if (taskStatus == null || taskStatus.getName() == null || taskStatus.getName().trim().isEmpty()) {
       return ResponseEntity.badRequest().build();
     }
 
-    service.addTaskStatus(taskStatus);
-    return ResponseEntity.status(201).build();
+        return ResponseEntity.ok(service.addTaskStatus(taskStatus));
   }
 }

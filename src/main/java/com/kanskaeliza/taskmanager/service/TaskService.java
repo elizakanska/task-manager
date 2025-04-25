@@ -23,7 +23,7 @@ public interface TaskService {
 
   List<TaskStatus> getTaskStatuses();
 
-  void addTaskType(TaskType taskType);
+  List<TaskType> addTaskType(TaskType taskType);
 
-  void addTaskStatus(TaskStatus taskStatus);
+  List<TaskStatus> addTaskStatus(TaskStatus taskStatus);
 }

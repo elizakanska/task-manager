@@ -50,7 +50,6 @@ export class TasksComponent {
   newStatus = '';
 
   private searchTrigger$ = new BehaviorSubject<string>('');
-  private refreshData$ = new BehaviorSubject<void>(undefined);
 
   constructor(
     private fb: FormBuilder,
@@ -72,11 +71,8 @@ export class TasksComponent {
   }
 
   private setupDataStreams(): void {
-    combineLatest([
-      this.searchTrigger$,
-      this.refreshData$
-    ]).pipe(
-      switchMap(([query]) => this.taskService.getTasks(query)),
+    this.searchTrigger$.pipe(
+      switchMap(query => this.taskService.getTasks(query)),
       takeUntilDestroyed(this.destroyRef)
     ).subscribe({
       next: tasks => this.tasks.set(tasks),
@@ -99,10 +95,6 @@ export class TasksComponent {
       },
       error: err => console.error('Error loading static data:', err)
     });
-  }
-
-  refreshTasks(): void {
-    this.refreshData$.next();
   }
 
   searchTasks(): void {
@@ -145,11 +137,14 @@ export class TasksComponent {
       takeUntilDestroyed(this.destroyRef),
       finalize(() => this.isSubmitting = false)
     ).subscribe({
-      next: () => {
-        this.refreshTasks();
+      next: (updatedTasks) => {
+        this.tasks.set(updatedTasks);
         this.closeTaskForm();
       },
-      error: (err) => console.error('Error saving task:', err)
+      error: (err) => {
+        console.error('Error saving task:', err);
+        alert(`Error saving task: ${err.error?.message || err.message}`);
+      }
     });
   }
 
@@ -158,10 +153,10 @@ export class TasksComponent {
       this.taskService.deleteTask(id).pipe(
         takeUntilDestroyed(this.destroyRef)
       ).subscribe({
-        next: () => this.refreshTasks(),
+        next: (updatedTasks) => this.tasks.set(updatedTasks),
         error: (err) => {
           console.error(err);
-          this.refreshTasks();
+          this.searchTrigger$.next(this.searchQuery.trim());
         }
       });
     }
@@ -196,24 +191,23 @@ export class TasksComponent {
   addNewType(): void {
     if (!this.newType.trim()) return;
     this.taskService.addNewType(this.newType.trim()).pipe(
-      switchMap(() => this.taskService.getTaskTypes()),
       takeUntilDestroyed(this.destroyRef)
     ).subscribe({
-      next: types => {
+      next: (types) => {
         this.taskTypes.set(types);
         this.newType = '';
       },
       error: (err) => console.error('Failed to add type:', err)
     });
+
   }
 
   addNewStatus(): void {
     if (!this.newStatus.trim()) return;
     this.taskService.addNewStatus(this.newStatus.trim()).pipe(
-      switchMap(() => this.taskService.getTaskStatuses()),
       takeUntilDestroyed(this.destroyRef)
     ).subscribe({
-      next: statuses => {
+      next: (statuses) => {
         this.taskStatuses.set(statuses);
         this.newStatus = '';
       },

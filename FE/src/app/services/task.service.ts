@@ -54,14 +54,14 @@ export class TaskService {
     );
   }
 
-  addNewType(newType: string): Observable<void> {
-    return this.http.post<void>(`${API_URL}/task-types`, { name: newType }).pipe(
+  addNewType(newType: string): Observable<{ id: number, name: string }[]> {
+    return this.http.post<{ id: number, name: string }[]>(`${API_URL}/task-types`, { name: newType }).pipe(
       catchError(handleError)
     );
   }
 
-  addNewStatus(newStatus: string): Observable<void> {
-    return this.http.post<void>(`${API_URL}/task-statuses`, { name: newStatus }).pipe(
+  addNewStatus(newStatus: string): Observable<{ id: number, name: string }[]> {
+    return this.http.post<{ id: number, name: string }[]>(`${API_URL}/task-statuses`, { name: newStatus }).pipe(
       catchError(handleError)
     );
   }
