@@ -8,21 +8,22 @@ import java.util.List;
 import java.util.Optional;
 
 public interface TaskService {
-  List<TaskDTO> getAllTasks();
 
-  Optional<TaskDTO> getTaskById(Long id);
+    List<TaskDTO> getAllTasks(String searchQuery);
 
-  TaskDTO saveTask(TaskDTO taskdto);
+    Optional<TaskDTO> getTaskById(Long id);
 
-  Optional<TaskDTO> editTaskById(Long id, TaskDTO taskdto);
+  List<TaskDTO> saveTask(TaskDTO taskdto);
 
-  void deleteTaskById(Long id);
+  List<TaskDTO> editTaskById(Long id, TaskDTO taskdto);
+
+  List<TaskDTO> deleteTaskById(Long id);
 
   List<TaskType> getTaskTypes();
 
   List<TaskStatus> getTaskStatuses();
 
-  void addTaskType(TaskType taskType);
+  List<TaskType> addTaskType(TaskType taskType);
 
-  void addTaskStatus(TaskStatus taskStatus);
+  List<TaskStatus> addTaskStatus(TaskStatus taskStatus);
 }

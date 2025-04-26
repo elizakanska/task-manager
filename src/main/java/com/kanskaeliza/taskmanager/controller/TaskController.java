@@ -17,8 +17,8 @@ public class TaskController {
   private final TaskService service;
 
   @GetMapping("/tasks")
-  public ResponseEntity<List<TaskDTO>> getAllTasks() {
-    return ResponseEntity.ok(service.getAllTasks());
+  public ResponseEntity<List<TaskDTO>> getAllTasks(@RequestParam(required = false) String searchQuery) {
+    return ResponseEntity.ok(service.getAllTasks(searchQuery));
   }
 
   @GetMapping("/tasks/{id}")
@@ -29,31 +29,18 @@ public class TaskController {
   }
 
   @PostMapping("/tasks")
-  public ResponseEntity<TaskDTO> createTask(@RequestBody TaskDTO taskdto) {
-    if (taskdto == null) {
-      return ResponseEntity.badRequest().build();
-    }
-    TaskDTO savedTaskDTO = service.saveTask(taskdto);
-    return ResponseEntity.status(201).body(savedTaskDTO);
+  public ResponseEntity<List<TaskDTO>> createTask(@RequestBody TaskDTO taskdto) {
+    return ResponseEntity.ok(service.saveTask(taskdto));
   }
 
   @PutMapping("/tasks/{id}")
-  public ResponseEntity<TaskDTO> updateTask(@PathVariable Long id, @RequestBody TaskDTO taskdto) {
-    if (taskdto == null) {
-      return ResponseEntity.badRequest().build();
-    }
-    return service.editTaskById(id, taskdto)
-      .map(ResponseEntity::ok)
-      .orElse(ResponseEntity.notFound().build());
+  public ResponseEntity<List<TaskDTO>> updateTask(@PathVariable Long id, @RequestBody TaskDTO taskdto) {
+    return ResponseEntity.ok(service.editTaskById(id, taskdto));
   }
 
   @DeleteMapping("/tasks/{id}")
-  public ResponseEntity<Void> deleteTask(@PathVariable Long id) {
-    if (service.getTaskById(id).isEmpty()) {
-      return ResponseEntity.notFound().build();
-    }
-    service.deleteTaskById(id);
-    return ResponseEntity.noContent().build();
+  public ResponseEntity<List<TaskDTO>> deleteTask(@PathVariable Long id) {
+    return ResponseEntity.ok(service.deleteTaskById(id));
   }
 
   @GetMapping("/task-types")
@@ -62,13 +49,12 @@ public class TaskController {
   }
 
   @PostMapping("/task-types")
-  public ResponseEntity<Void> addNewTaskType(@RequestBody TaskType taskType) {
-    if (taskType == null || taskType.getName() == null || taskType.getName().trim().isEmpty()) {
+  public ResponseEntity<List<TaskType>> addNewTaskType(@RequestBody TaskType taskType) {
+    if (taskType == null || taskType.getName() == null || taskType.getName().isEmpty()) {
       return ResponseEntity.badRequest().build();
     }
 
-    service.addTaskType(taskType);
-    return ResponseEntity.status(201).build();
+    return ResponseEntity.ok(service.addTaskType(taskType));
   }
 
   @GetMapping("/task-statuses")
@@ -77,12 +63,11 @@ public class TaskController {
   }
 
   @PostMapping("/task-statuses")
-  public ResponseEntity<Void> addNewTaskStatus(@RequestBody TaskStatus taskStatus) {
-    if (taskStatus == null || taskStatus.getName() == null || taskStatus.getName().trim().isEmpty()) {
+  public ResponseEntity<List<TaskStatus>> addNewTaskStatus(@RequestBody TaskStatus taskStatus) {
+    if (taskStatus == null || taskStatus.getName() == null || taskStatus.getName().isEmpty()) {
       return ResponseEntity.badRequest().build();
     }
 
-    service.addTaskStatus(taskStatus);
-    return ResponseEntity.status(201).build();
+        return ResponseEntity.ok(service.addTaskStatus(taskStatus));
   }
 }

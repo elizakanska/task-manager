@@ -1,39 +1,42 @@
 <div class="container">
   <h2>Task Manager</h2>
 
-  <input
-    type="text"
-    [(ngModel)]="searchQuery"
-    placeholder="Search by task description"
-    class="search-bar"
-    (input)="searchTasks()"/>
+  <div class="search-container">
+    <input
+      type="text"
+      [(ngModel)]="searchQuery"
+      placeholder="Search by title"
+      class="search-bar"
+      (input)="searchTasks()"/>
 
-  <button (click)="openTaskForm()" class="btn btn-primary">
-    <span nz-icon nzType="plus-circle"></span>
-    <span> Add New Task</span>
-  </button>
+    <button (click)="openTaskForm()" class="btn btn-primary">
+      <span nz-icon nzType="plus-circle"></span>
+      <span> Add New Task</span>
+    </button>
+  </div>
 
   <table class="table">
     <thead>
     <tr>
       <th>Title</th>
-      <th>Status</th>
       <th>Type</th>
+      <th>Status</th>
+      <th>Assigned To</th>
       <th>Action</th>
     </tr>
     </thead>
     <tbody>
-      @for (task of filteredTasks; track task.id) {
+      @for (task of tasks(); track task.id) {
         <tr>
           <td><a (click)="viewTaskDetails(task.id)">{{ task.title }}</a></td>
-          <td>{{ getStatusName(task.statusId) }}</td>
           <td>{{ getTypeName(task.typeId) }}</td>
+          <td>{{ getStatusName(task.statusId) }}</td>
+          <td>{{ getAssignedUserName(task.assignedTo) }}</td>
           <td>
-            <button (click)="editTask(task)" class="btn btn-warning">
+            <button (click)="openTaskForm(task)" class="btn btn-warning">
               <span nz-icon nzType="edit"></span>
               <span> Edit</span>
             </button>
-
             <button (click)="deleteTask(task.id)" class="btn btn-danger">
               <span nz-icon nzType="delete"></span>
               <span> Delete</span>
@@ -47,47 +50,119 @@
   <div class="modal" [ngClass]="{ 'is-visible': showTaskForm }">
     <div class="modal-content custom-form">
       <form nz-form [formGroup]="taskFormGroup" (ngSubmit)="saveTask()">
-        <h3>{{ editingTask ? 'Task Details' : 'Add Task' }}</h3>
+        <h3>{{ editingTask ? 'Edit Task' : 'Add New Task' }}</h3>
 
-        <app-form-control label="Title" formControlName="title" errorMessage="Invalid title! Title must be 3-50 characters!"></app-form-control>
-        <app-form-control label="Description" formControlName="description" errorMessage="Invalid description! Description must be 5-200 characters!"></app-form-control>
-        <app-form-control label="Type" formControlName="typeId" errorMessage="Please select or enter a type!">
-          <nz-select formControlName="typeId" nzPlaceHolder="Select Type" [nzDropdownRender]="typeTemplate">
-            @for (option of statusOptions; track option.id) {
-              <nz-option [nzValue]="option.id" [nzLabel]="option.name"></nz-option>
-            }
-          </nz-select>
-          <ng-template #typeTemplate>
-            <input nz-input [(ngModel)]="newType" placeholder="Add new type" [ngModelOptions]="{standalone: true}"/>
-            <button nz-button nzType="link" (click)="addNewType()">
-              + Add "{{ newType }}"
-            </button>
-          </ng-template>
-        </app-form-control>
+        <nz-form-item>
+          <nz-form-label>Title</nz-form-label>
+          <nz-form-control [nzErrorTip]="'Title is required!'">
+            <input nz-input formControlName="title">
+          </nz-form-control>
+        </nz-form-item>
 
-        <app-form-control label="Status" formControlName="statusId" errorMessage="Please select or enter a status!">
-          <nz-select formControlName="statusId" nzPlaceHolder="Select Status" [nzDropdownRender]="statusTemplate">
-            @for (option of statusOptions; track option.id) {
-              <nz-option [nzValue]="option.id" [nzLabel]="option.name"></nz-option>
-            }
-          </nz-select>
-          <ng-template #statusTemplate>
-            <input nz-input [(ngModel)]="newStatus" placeholder="Add new status" [ngModelOptions]="{standalone: true}"/>
-            <button nz-button nzType="link" (click)="addNewStatus()">
-              + Add "{{ newStatus }}"
-            </button>
-          </ng-template>
-        </app-form-control>
+        <nz-form-item>
+          <nz-form-label>Description</nz-form-label>
+          <nz-form-control [nzErrorTip]="'Description is required!'">
+            <textarea nz-input formControlName="description"></textarea>
+          </nz-form-control>
+        </nz-form-item>
 
-        <app-form-control label="Created On" formControlName="createdOn" errorMessage="Date is required!">
-          <nz-date-picker nz-input nzFormat="dd-MMM-yyyy" formControlName="createdOn"></nz-date-picker>
-        </app-form-control>
+        <nz-form-item>
+          <nz-form-label>Type</nz-form-label>
+          <nz-form-control [nzErrorTip]="'Type is required!'">
+            <nz-select formControlName="typeId" [nzDropdownRender]="typeTemplate">
+              @for (typeEntry of taskTypes() | keyvalue; track typeEntry.key) {
+                <nz-option [nzValue]="typeEntry.key" [nzLabel]="typeEntry.value.name"></nz-option>
+              }
+            </nz-select>
+            <ng-template #typeTemplate>
+              <div>
+                <input
+                  nz-input
+                  [(ngModel)]="newType"
+                  placeholder="Add new type"
+                  [ngModelOptions]="{standalone: true}"
+                  (keydown.enter)="addNewType()"
+                >
+                <button
+                  nz-button
+                  nzType="link"
+                  (click)="addNewType()"
+                  [disabled]="!newType.trim()"
+                >
+                  + Add "{{ newType }}"
+                </button>
+              </div>
+            </ng-template>
+          </nz-form-control>
+        </nz-form-item>
 
-        <button nz-button class="login-form-button login-form-margin" [nzType]="'primary'">
-          {{ editingTask ? 'Update' : 'Create' }}
+        <nz-form-item>
+          <nz-form-label>Status</nz-form-label>
+          <nz-form-control [nzErrorTip]="'Status is required!'">
+            <nz-select formControlName="statusId" [nzDropdownRender]="statusTemplate">
+              @for (statusEntry of taskStatuses() | keyvalue; track statusEntry.key) {
+                <nz-option [nzValue]="statusEntry.key" [nzLabel]="statusEntry.value.name"></nz-option>
+              }
+            </nz-select>
+            <ng-template #statusTemplate>
+              <div>
+                <input
+                  nz-input
+                  [(ngModel)]="newStatus"
+                  placeholder="Add new status"
+                  [ngModelOptions]="{standalone: true}"
+                  (keydown.enter)="addNewStatus()"
+                >
+                <button
+                  nz-button
+                  nzType="link"
+                  (click)="addNewStatus()"
+                  [disabled]="!newStatus.trim()"
+                >
+                  + Add "{{ newStatus }}"
+                </button>
+              </div>
+            </ng-template>
+          </nz-form-control>
+        </nz-form-item>
+
+        <nz-form-item>
+          <nz-form-label>Assigned To</nz-form-label>
+          <nz-form-control>
+            <nz-select formControlName="assignedTo">
+              <nz-option [nzValue]="null" nzLabel="UNASSIGNED"></nz-option>
+              @for (user of users(); track user.id) {
+                <nz-option
+                  [nzValue]="user.id"
+                  [nzLabel]="user.firstName + ' ' + user.lastName + ' (' + user.username + ')'">
+                </nz-option>
+              }
+            </nz-select>
+          </nz-form-control>
+        </nz-form-item>
+
+        <nz-form-item>
+          <nz-form-label>Created On</nz-form-label>
+          <nz-form-control [nzErrorTip]="'Date is required!'">
+            <nz-date-picker nz-input formControlName="createdOn"></nz-date-picker>
+          </nz-form-control>
+        </nz-form-item>
+
+        <button
+          nz-button
+          class="login-form-button login-form-margin"
+          [nzType]="'primary'"
+          [disabled]="taskFormGroup.invalid || isSubmitting"
+          type="submit">
+          {{ isSubmitting ? 'Processing...' : (editingTask ? 'Update' : 'Create') }}
         </button>
 
-        <button nz-button class="login-form-button login-form-margin" (click)="closeTaskForm(); $event.preventDefault()" nzType="default">
+        <button
+          nz-button
+          class="login-form-button login-form-margin"
+          (click)="closeTaskForm(); $event.preventDefault()"
+          [disabled]="isSubmitting"
+          nzType="default">
           Cancel
         </button>
       </form>
@@ -99,8 +174,9 @@
       <h3>Task Details</h3>
       <p><strong>Title:</strong> {{ selectedTask?.title }}</p>
       <p><strong>Description:</strong> {{ selectedTask?.description }}</p>
-      <p><strong>Type:</strong> {{ getTypeName(selectedTask?.typeId ?? 0) }}</p>
+      <p><strong>Type:</strong> {{ getTypeName((selectedTask?.typeId ?? 0)) }}</p>
       <p><strong>Status:</strong> {{ getStatusName(selectedTask?.statusId ?? 0) }}</p>
+      <p><strong>Assigned To:</strong> {{ getAssignedUserName(selectedTask?.assignedTo) }}</p>
       <p><strong>Created On:</strong> {{ selectedTask?.createdOn | date:'dd-MMM-yyyy' }}</p>
       <button nz-button nzType="default" (click)="closeTaskDetails()">Close</button>
     </div>
